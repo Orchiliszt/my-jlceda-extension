@@ -10,14 +10,44 @@
  * 如需了解更多开发细节，请阅读：
  * https://prodocs.lceda.cn/cn/api/guide/
  */
-import * as extensionConfig from '../extension.json';
+// import * as extensionConfig from '../extension.json';
 
-// eslint-disable-next-line unused-imports/no-unused-vars
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function activate(status?: 'onStartupFinished', arg?: string): void {}
 
-export function about(): void {
-	eda.sys_Dialog.showInformationMessage(
-		eda.sys_I18n.text('EasyEDA extension SDK v', undefined, undefined, extensionConfig.version),
-		eda.sys_I18n.text('About'),
-	);
+// export function about(): void {
+// 	eda.sys_Dialog.showInformationMessage(
+// 		eda.sys_I18n.text('EasyEDA extension SDK v', undefined, undefined, extensionConfig.version),
+// 		eda.sys_I18n.text('About'),
+// 	);
+// }
+
+export function auxiliaryChangeNet(): void {
+	eda.sys_IFrame.openIFrame('iframe/index.html', 340, 200, 'mainAuxiliaryWindow', {
+		buttonCallbackFn: (e: String) => {
+			if (e === 'close') {
+				// eda.sys_Message.removeFollowMouseTip();
+				console.log('mainAuxiliaryWindow closed');
+				if (eda.sch_Event.isEventListenerAlreadyExist('Selected')) {
+					let result = eda.sch_Event.removeEventListener('Selected');
+					console.log('mainAuxiliaryWindow removeEventListener', result);
+				}
+			}
+		},
+	});
+}
+
+export function getOrSetNet(): void {
+	eda.sys_IFrame.openIFrame('./iframe/getOrSetNet.html', 340, 200, 'getOrSetNetWindow', {
+		buttonCallbackFn: (e: String) => {
+			if (e === 'close') {
+				// eda.sys_Message.removeFollowMouseTip();
+				console.log('getOrSetNetWindow closed');
+				if (eda.sch_Event.isEventListenerAlreadyExist('Selected')) {
+					let result = eda.sch_Event.removeEventListener('Selected');
+					console.log('getOrSetNetWindow removeEventListener', result);
+				}
+			}
+		},
+	});
 }
