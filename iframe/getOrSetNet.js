@@ -18,7 +18,7 @@ cancelBtn.addEventListener('click', () => {
 	NetNames = [];
 	generatorInput.value = '未开始';
 	if (eda.sch_Event.isEventListenerAlreadyExist('Selected')) {
-		let result = eda.sch_Event.removeEventListener('Selected');
+		const result = eda.sch_Event.removeEventListener('Selected');
 		console.log('removeEventListener', result);
 	}
 });
@@ -26,7 +26,8 @@ cancelBtn.addEventListener('click', () => {
 async function getOrSetNetName() {
 	const primitiveIds = await eda.sch_SelectControl.getAllSelectedPrimitives_PrimitiveId();
 	console.log('getOrSetNetName', primitiveIds);
-	if (!primitiveIds.length) return;
+	if (!primitiveIds.length)
+		return;
 
 	let tempStatus = CurrentStatus;
 
@@ -41,7 +42,8 @@ async function getOrSetNetName() {
 					if (CurrentStatus === GET) {
 						NetNames.push(item.getState_Net());
 						tempStatus = SET;
-					} else {
+					}
+					else {
 						if (NetNames.length === 0) {
 							return;
 						}
@@ -54,10 +56,12 @@ async function getOrSetNetName() {
 		}
 	}
 	CurrentStatus = tempStatus;
-	if (NetNames.length === 0) CurrentStatus = GET;
+	if (NetNames.length === 0)
+		CurrentStatus = GET;
 	if (CurrentStatus === GET) {
 		generatorInput.value = '待复制';
-	} else {
+	}
+	else {
 		generatorInput.value = NetNames.join('、');
 	}
 }

@@ -1,5 +1,5 @@
 {
-	"prettier.enable": false,
+	"prettier.enable": true,
 	"editor.formatOnSave": false,
 	"editor.codeActionsOnSave": {
 		"source.fixAll.eslint": "always",
@@ -61,6 +61,8 @@
 		"ISYS",
 		"jlceda",
 		"lceda",
+		"netlabel",
+		"Netlist",
 		"nodebuffer",
 		"npmrc",
 		"OSHW",

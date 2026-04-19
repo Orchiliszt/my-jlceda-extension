@@ -42,7 +42,8 @@ container.addEventListener('click', (e) => {
 	if (addBtn) {
 		e.preventDefault();
 		const currentRow = addBtn.closest('.row');
-		if (!currentRow) return;
+		if (!currentRow)
+			return;
 		const newRow = createRow();
 		currentRow.insertAdjacentElement('afterend', newRow);
 		return;
@@ -52,7 +53,8 @@ container.addEventListener('click', (e) => {
 	if (deleteBtn) {
 		e.preventDefault();
 		const currentRow = deleteBtn.closest('.row');
-		if (!currentRow) return;
+		if (!currentRow)
+			return;
 
 		const allRows = document.querySelectorAll('.row');
 		if (allRows.length <= 1) {
@@ -67,7 +69,7 @@ container.addEventListener('click', (e) => {
 // ---------- 主按钮事件 ----------
 startBtn.addEventListener('click', () => {
 	const rows = document.querySelectorAll('.row');
-	const rowsData = Array.from(rows).map((row) => ({
+	const rowsData = Array.from(rows).map(row => ({
 		type: row.querySelector('select')?.value || '',
 		value: row.querySelector('input')?.value || '',
 	}));
@@ -179,7 +181,8 @@ function ensureRowExists() {
 			const row = createRow(selectValue, inputValue);
 			container.appendChild(row);
 		});
-	} else {
+	}
+	else {
 		// 如果没有数据或数据为空，至少添加一行默认行（可选）
 		container.appendChild(createRow(FIXED, ''));
 	}
@@ -196,7 +199,8 @@ function changeSelectedNetName() {
 	console.log('changeSelectedNetName', currentNetName);
 	eda.sch_SelectControl.getAllSelectedPrimitives_PrimitiveId().then(async (items) => {
 		console.log('changeSelectedNetName', items);
-		if (!items.length) return;
+		if (!items.length)
+			return;
 		let updateFlag = false;
 		const oldNetName = [];
 
@@ -216,8 +220,10 @@ function changeSelectedNetName() {
 						tempUpdateFlag = updateFlag = true;
 					}
 				});
-				if (tempUpdateFlag) oldNetName.push({ id, netNames: tempNetName });
-			} else if (type === 'netlabel') {
+				if (tempUpdateFlag)
+					oldNetName.push({ id, netNames: tempNetName });
+			}
+			else if (type === 'netlabel') {
 				const netlabel = await eda.sch_PrimitiveText.get(id);
 				console.log('changeSelectedNetName', id, netlabel);
 				const tempNetName = [netlabel?.getState_Content()];
@@ -226,11 +232,13 @@ function changeSelectedNetName() {
 				if (result) {
 					updateFlag = true;
 					oldNetName.push({ id, netNames: tempNetName });
-				} else {
+				}
+				else {
 					console.log('changeSelectedNetName', 'change netlabel fail');
 					eda.sys_Message.showToastMessage('修改网络标签失败', 'warning', 3);
 				}
-			} else if (type === 'Text') {
+			}
+			else if (type === 'Text') {
 				eda.sys_Message.showToastMessage('当前选中为文本, 请点击到端口', 'info', 3);
 			}
 		}
@@ -272,15 +280,15 @@ async function undoChangeOnce() {
 				if (['netport', 'netflag'].includes(componentType)) {
 					item.setState_Name(netNames[index]);
 					item.done();
-				} else if (componentType === 'offPageConnector') {
+				}
+				else if (componentType === 'offPageConnector') {
 					eda.sys_Message.showToastMessage('暂不支持撤销对跨页链接标识的修改', 'info', 3);
 				}
 			});
-		} else if (type === 'netlabel') {
+		}
+		else if (type === 'netlabel') {
 			const result = await eda.sch_PrimitiveText.modify(id, { content: netNames[0] });
-			if (result) {
-				updateFlag = true;
-			} else {
+			if (!result) {
 				console.log('undoChangeOnce', 'change netlabel fail');
 				eda.sys_Message.showToastMessage('撤销修改网络标签失败', 'warning', 3);
 			}
@@ -314,7 +322,7 @@ function getPrevious() {
 		eda.sys_Message.showToastMessage('网络标签序列生成失败, 请关闭重试', 'error', 3);
 		return;
 	}
-	let preVal = currentGenerator.previous();
+	const preVal = currentGenerator.previous();
 	if (preVal === null) {
 		eda.sys_Message.showToastMessage('已到序列最前端，无上一个', 'info', 3);
 		return;
@@ -331,12 +339,14 @@ function getPrevious() {
  */
 function expandRange(rangeStr) {
 	// 格式如 [0-9] 或 [A-Z] 或 [a-z]
-	const match = rangeStr.match(/^([A-Za-z0-9])[-~:;；：]([A-Za-z0-9])$/);
-	if (!match) return [rangeStr];
+	const match = rangeStr.match(/^([A-Z0-9])[-~:;；：]([A-Z0-9])$/i);
+	if (!match)
+		return [rangeStr];
 	const start = match[1].charCodeAt(0);
 	const end = match[2].charCodeAt(0);
 	// if (start > end) throw new Error(`范围起始大于结束: ${rangeStr}`);
-	if (start > end) return [rangeStr];
+	if (start > end)
+		return [rangeStr];
 	const result = [];
 	for (let i = start; i <= end; i++) {
 		result.push(String.fromCharCode(i));
@@ -354,7 +364,7 @@ function expandExpression(expr) {
 		return [expr];
 	}
 	// 按 '[' 或 ']' 分割，每个部分可能是范围或普通字符串
-	const parts = expr.split(/[【\[\]】]/g).filter((part) => part.trim() !== '');
+	const parts = expr.split(/[【[\]】]/g).filter(part => part.trim() !== '');
 	const expandedParts = parts.map((part) => {
 		return expandRange(part);
 	});
@@ -365,7 +375,7 @@ function expandExpression(expr) {
 		const newResult = [];
 		for (const suffix of result) {
 			for (const item of current) {
-				newResult.push((suffix ? suffix : '') + item);
+				newResult.push((suffix || '') + item);
 			}
 		}
 		result = newResult;
@@ -378,7 +388,7 @@ function expandExpression(expr) {
  * 按逗号分隔各个部分，每个部分展开后顺序拼接
  */
 function parseIncrementalRule(input) {
-	const parts = input.split(/[,，]/).map((s) => s.trim());
+	const parts = input.split(/[,，]/).map(s => s.trim());
 	let sequence = [];
 	for (const part of parts) {
 		const expanded = expandExpression(part);
@@ -397,9 +407,11 @@ function sequenceGenerator(rowsData) {
 	const rowSequences = rowsData.map((row) => {
 		if (row.type === FIXED) {
 			return [row.value]; // 固定行只有一个值
-		} else if (row.type === INCREMENTAL) {
+		}
+		else if (row.type === INCREMENTAL) {
 			return parseIncrementalRule(row.value);
-		} else {
+		}
+		else {
 			throw new Error(`未知的行类型: ${row.type}`);
 		}
 	});
@@ -411,7 +423,7 @@ function sequenceGenerator(rowsData) {
 		const newResult = [];
 		for (const suffix of result) {
 			for (const item of current) {
-				newResult.push((suffix ? suffix : '') + item);
+				newResult.push((suffix || '') + item);
 			}
 		}
 		result = newResult;
@@ -423,14 +435,16 @@ function sequenceGenerator(rowsData) {
 	let currentIndex = -1;
 
 	const next = () => {
-		if (currentIndex >= totalCount - 1) return null;
+		if (currentIndex >= totalCount - 1)
+			return null;
 		currentIndex++;
 		const result = resultSequences[currentIndex];
 		return result;
 	};
 
 	const previous = () => {
-		if (currentIndex <= 0) return null;
+		if (currentIndex <= 0)
+			return null;
 		currentIndex--;
 		const result = resultSequences[currentIndex];
 		return result;
@@ -471,5 +485,5 @@ function sequenceGenerator(rowsData) {
 	// 	currentIndices.fill(0);
 	// 	ended = false;
 	// };
-	//return { next, reset };
+	// return { next, reset };
 }

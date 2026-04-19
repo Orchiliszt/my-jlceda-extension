@@ -9,5 +9,17 @@ export default antfu({
 
 	typescript: true,
 
-	ignores: ['build/dist/', 'coverage/', 'dist/', 'node_modules/', '.eslintcache', 'debug.log'],
+	ignores: ['build/dist/', 'coverage/', 'dist/', 'node_modules/', '.eslintcache', 'debug.log', 'test.js'],
+
+	rules: {
+		'no-console': 'off',
+	},
+
+	languageOptions: {
+		globals: {
+			eda: 'readonly',
+			EDMT_EditorDocumentType: 'readonly',
+		},
+	},
+
 });

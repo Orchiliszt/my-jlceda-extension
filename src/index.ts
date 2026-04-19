@@ -12,8 +12,7 @@
  */
 // import * as extensionConfig from '../extension.json';
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export function activate(status?: 'onStartupFinished', arg?: string): void {}
+// export function activate(status?: 'onStartupFinished', arg?: string): void {}
 
 // export function about(): void {
 // 	eda.sys_Dialog.showInformationMessage(
@@ -24,12 +23,12 @@ export function activate(status?: 'onStartupFinished', arg?: string): void {}
 
 export function auxiliaryChangeNet(): void {
 	eda.sys_IFrame.openIFrame('iframe/index.html', 340, 200, 'mainAuxiliaryWindow', {
-		buttonCallbackFn: (e: String) => {
+		buttonCallbackFn: (e: string) => {
 			if (e === 'close') {
 				// eda.sys_Message.removeFollowMouseTip();
 				console.log('mainAuxiliaryWindow closed');
 				if (eda.sch_Event.isEventListenerAlreadyExist('Selected')) {
-					let result = eda.sch_Event.removeEventListener('Selected');
+					const result = eda.sch_Event.removeEventListener('Selected');
 					console.log('mainAuxiliaryWindow removeEventListener', result);
 				}
 			}
@@ -39,13 +38,32 @@ export function auxiliaryChangeNet(): void {
 
 export function getOrSetNet(): void {
 	eda.sys_IFrame.openIFrame('./iframe/getOrSetNet.html', 340, 200, 'getOrSetNetWindow', {
-		buttonCallbackFn: (e: String) => {
+		buttonCallbackFn: (e: string) => {
 			if (e === 'close') {
 				// eda.sys_Message.removeFollowMouseTip();
 				console.log('getOrSetNetWindow closed');
 				if (eda.sch_Event.isEventListenerAlreadyExist('Selected')) {
-					let result = eda.sch_Event.removeEventListener('Selected');
+					const result = eda.sch_Event.removeEventListener('Selected');
 					console.log('getOrSetNetWindow removeEventListener', result);
+				}
+			}
+		},
+	});
+}
+
+export function setNetToPin(): void {
+	eda.sys_IFrame.openIFrame('./iframe/setNetToPin.html', 340, 200, 'setNetToPinWindow', {
+		buttonCallbackFn: (e: string) => {
+			if (e === 'close') {
+				// eda.sys_Message.removeFollowMouseTip();
+				console.log('setNetToPinWindow closed');
+				if (eda.sch_Event.isEventListenerAlreadyExist('SelectedSCH')) {
+					const result = eda.sch_Event.removeEventListener('SelectedSCH');
+					console.log('setNetToPinWindow removeEventListener sch', result);
+				}
+				if (eda.pcb_Event.isEventListenerAlreadyExist('SelectedPCB')) {
+					const result = eda.pcb_Event.removeEventListener('SelectedPCB');
+					console.log('setNetToPinWindow removeEventListener pcb', result);
 				}
 			}
 		},
