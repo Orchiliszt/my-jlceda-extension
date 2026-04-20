@@ -1,12 +1,12 @@
 {
 	"name": "pro-api-sdk",
-	"uuid": "",
-	"displayName": "PRO API SDK",
-	"description": "嘉立创EDA & EasyEDA 专业版扩展 API 开发工具",
-	"version": "1.0.0",
-	"publisher": "",
+	"uuid": "5ef23c067da94203b5edfaffcde84edb",
+	"displayName": "网络修改工具",
+	"description": "原理图网络标签修改辅助工具",
+	"version": "1.0.1",
+	"publisher": "lzq",
 	"engines": {
-		"eda": "^3.0.0"
+		"eda": "^3.2.117"
 	},
 	"license": "Apache-2.0",
 	"repository": {
@@ -14,53 +14,49 @@
 		"url": ""
 	},
 	"categories": "Other",
-	"keywords": [
-		"SDK"
-	],
+	"keywords": ["SDK"],
 	"images": {
 		"logo": "./images/logo.png"
 	},
-	"homepage": "",
-	"bugs": "",
+	"homepage": "https://pro.lceda.cn",
+	"bugs": "https://lceda.cn/page/feedback?originPage=other",
 	"activationEvents": {},
 	"entry": "./dist/index",
 	"dependentExtensions": {},
 	"headerMenus": {
-		"home": [
-			{
-				"id": "API SDK",
-				"title": "API SDK",
-				"menuItems": [
-					{
-						"id": "About",
-						"title": "About...",
-						"registerFn": "about"
-					}
-				]
-			}
-		],
+		"home": [],
 		"sch": [
 			{
-				"id": "API SDK",
-				"title": "API SDK",
+				"id": "Net Toolkit",
+				"title": "网络辅助工具",
 				"menuItems": [
 					{
-						"id": "About",
-						"title": "About...",
-						"registerFn": "about"
+						"id": "Auxiliary Change Net",
+						"title": "网络端口修改",
+						"registerFn": "auxiliaryChangeNet"
+					},
+					{
+						"id": "Get Or Set Net",
+						"title": "复制修改网络端口",
+						"registerFn": "getOrSetNet"
+					},
+					{
+						"id": "Set Net To Pin",
+						"title": "放置网络端口到引脚",
+						"registerFn": "setNetToPin"
 					}
 				]
 			}
 		],
 		"pcb": [
 			{
-				"id": "API SDK",
-				"title": "API SDK",
+				"id": "Net Toolkit",
+				"title": "网络辅助工具",
 				"menuItems": [
 					{
-						"id": "About",
-						"title": "About...",
-						"registerFn": "about"
+						"id": "Set Net To Pin",
+						"title": "放置网络端口到引脚",
+						"registerFn": "setNetToPin"
 					}
 				]
 			}

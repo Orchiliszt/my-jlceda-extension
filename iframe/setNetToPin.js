@@ -7,7 +7,7 @@ generatorInput.value = '当前可用的元件引脚列表:0';
 let CompPinList = {};
 
 getBtn.addEventListener('click', async () => {
-	if ((await eda.dmt_SelectControl.getCurrentDocumentInfo().documentType) !== EDMT_EditorDocumentType.PCB) {
+	if ((await eda.dmt_SelectControl.getCurrentDocumentInfo()).documentType !== EDMT_EditorDocumentType.PCB) {
 		eda.sys_Message.showToastMessage('请在PCB中使用提取', 'info', 3);
 		return;
 	}
@@ -16,19 +16,22 @@ getBtn.addEventListener('click', async () => {
 		'SelectedPCB',
 		'selected',
 		async () => {
-			const comp = await eda.pcb_SelectControl.getAllSelectedPrimitives();
-			if (comp.primitiveType === 'Component') {
-				const compPinList = {
-					designator: comp.designator,
-					pinNetMap: {},
-				};
-				comp.pads.forEach((pad) => {
-					compPinList.pinNetMap[pad.num] = pad.net;
-				});
-				CompPinList[comp.uniqueId] = compPinList;
-			}
-			else {
-				eda.sys_Message.showToastMessage('请重新点击提取并选择元件', 'info', 3);
+			const comps = await eda.pcb_SelectControl.getAllSelectedPrimitives();
+			console.log('getBtn comp', comps);
+			for (const comp of comps) {
+				if (comp.primitiveType === 'Component') {
+					const compPinList = {
+						designator: comp.designator,
+						pinNetMap: {},
+					};
+					comp.pads.forEach((pad) => {
+						compPinList.pinNetMap[pad.num] = pad.net;
+					});
+					CompPinList[comp.uniqueId] = compPinList;
+				}
+				else {
+					eda.sys_Message.showToastMessage('请重新点击提取并选择元件', 'info', 3);
+				}
 			}
 			generatorInput.value = `当前可用的元件引脚列表:${Object.keys(CompPinList).length}`;
 		},
@@ -37,7 +40,7 @@ getBtn.addEventListener('click', async () => {
 });
 
 setBtn.addEventListener('click', async () => {
-	if ((await eda.dmt_SelectControl.getCurrentDocumentInfo().documentType) !== EDMT_EditorDocumentType.SCHEMATIC_PAGE) {
+	if ((await eda.dmt_SelectControl.getCurrentDocumentInfo()).documentType !== EDMT_EditorDocumentType.SCHEMATIC_PAGE) {
 		eda.sys_Message.showToastMessage('请在原理图图页中使用放置', 'info', 3);
 		return;
 	}
@@ -60,9 +63,11 @@ cancelBtn.addEventListener('click', () => {
 
 async function setNetToPin() {
 	const comps = await eda.sch_SelectControl.getAllSelectedPrimitives();
-	console.log('setNetToPin', comps);
-	if (!comps.length)
+	console.log('setNetToPin comps', comps);
+	if (!comps.length) {
+		generatorInput.value = `当前可用的元件引脚列表:${Object.keys(CompPinList).length}`;
 		return;
+	}
 
 	if (Object.keys(CompPinList).length === 0) {
 		eda.sys_Message.showToastMessage('暂无可用元件引脚列表,请先提取元件引脚信息', 'info', 3);
@@ -72,10 +77,10 @@ async function setNetToPin() {
 
 	const netlistBlob = await eda.sch_ManufactureData.getNetlistFile('', 'JLCEDA');
 	const netlistComps = JSON.parse(await netlistBlob.text()).components;
-	console.log('setNetToPin componentsPin', netlistComps);
+	console.log('setNetToPin netlistComps', netlistComps);
 
-	comps.forEach(async (comp) => {
-		const netlistCompInfo = netlistComps[comp.uniqueId]?.pinInfoMap;
+	for (const comp of comps) {
+		const netlistCompInfo = netlistComps[comp.uniqueId];
 		const netlistPinMap = netlistCompInfo?.pinInfoMap;
 		if (!netlistPinMap) {
 			eda.sys_Message.showToastMessage('获取选择元件引脚的网络信息失败', 'warn', 3);
@@ -92,8 +97,8 @@ async function setNetToPin() {
 		const allPin = await eda.sch_PrimitiveComponent.getAllPinsByPrimitiveId(comp.primitiveId);
 
 		for (const pin of allPin) {
-			console.log('setNetToPin pin,', pin, netlistPinMap[pin.pinNumber]?.net);
-			if (netlistPinMap[pin.pinNumber]?.net !== '')
+			console.log('setNetToPin pin', pin, netlistPinMap[pin.pinNumber]?.net);
+			if (netlistPinMap[pin.pinNumber]?.net !== '' || pinNetMap[pin.pinNumber] === '')
 				continue;
 
 			let x1 = pin.x;
@@ -117,5 +122,7 @@ async function setNetToPin() {
 			const wire = await eda.sch_PrimitiveWire.create([x1, y1, pin.x, pin.y]);
 			console.log('setNetToPin netPort,wire', netPort, wire);
 		}
-	});
+	}
+
+	generatorInput.value = `当前可用的元件引脚列表:${Object.keys(CompPinList).length}`;
 }

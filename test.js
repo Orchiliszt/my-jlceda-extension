@@ -182,22 +182,8 @@ eda.sch_Event.addMouseEventListener(
 			const type = await eda.sch_Primitive.getPrimitiveTypeByPrimitiveId(id);
 			if (type === 'Component') {
 				const comp = await eda.sch_PrimitiveComponent.get(id);
-
 				console.log('getOrSetNetName', id, comp);
-				if (['netport', 'offPageConnector', 'netflag'].includes(comp.getState_ComponentType())) {
-					const result = await eda.sch_PrimitiveComponent.delete(id);
-					console.log('delete old', result);
-					const netPort = await eda.sch_PrimitiveComponent.create(
-						comp.component,
-						comp.x,
-						comp.y,
-						comp.subPartName,
-						comp.rotation,
-						comp.mirror,
-					);
-					console.log('netPort', netPort);
-					netPort.setState_Name('NEEEE');
-				}
+				comp.done();
 			}
 		}
 	},
