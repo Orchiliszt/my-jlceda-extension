@@ -42,8 +42,8 @@ export function getOrSetNet(): void {
 			if (e === 'close') {
 				// eda.sys_Message.removeFollowMouseTip();
 				console.log('getOrSetNetWindow closed');
-				if (eda.sch_Event.isEventListenerAlreadyExist('Selected')) {
-					const result = eda.sch_Event.removeEventListener('Selected');
+				if (eda.sch_Event.isEventListenerAlreadyExist('getOrSetNet')) {
+					const result = eda.sch_Event.removeEventListener('getOrSetNet');
 					console.log('getOrSetNetWindow removeEventListener', result);
 				}
 			}
@@ -57,12 +57,12 @@ export function setNetToPin(): void {
 			if (e === 'close') {
 				// eda.sys_Message.removeFollowMouseTip();
 				console.log('setNetToPinWindow closed');
-				if (eda.sch_Event.isEventListenerAlreadyExist('SelectedSCH')) {
-					const result = eda.sch_Event.removeEventListener('SelectedSCH');
+				if (eda.sch_Event.isEventListenerAlreadyExist('setNetToPinSCH')) {
+					const result = eda.sch_Event.removeEventListener('setNetToPinSCH');
 					console.log('setNetToPinWindow removeEventListener sch', result);
 				}
-				if (eda.pcb_Event.isEventListenerAlreadyExist('SelectedPCB')) {
-					const result = eda.pcb_Event.removeEventListener('SelectedPCB');
+				if (eda.pcb_Event.isEventListenerAlreadyExist('setNetToPinPCB')) {
+					const result = eda.pcb_Event.removeEventListener('setNetToPinPCB');
 					console.log('setNetToPinWindow removeEventListener pcb', result);
 				}
 			}

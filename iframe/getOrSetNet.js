@@ -11,14 +11,14 @@ generatorInput.value = '未开始';
 startBtn.addEventListener('click', () => {
 	CurrentStatus = GET;
 	generatorInput.value = '待复制';
-	eda.sch_Event.addMouseEventListener('Selected', 'selected', getOrSetNetName);
+	eda.sch_Event.addMouseEventListener('getOrSetNet', 'selected', getOrSetNetName);
 });
 
 cancelBtn.addEventListener('click', () => {
 	NetNames = [];
 	generatorInput.value = '未开始';
-	if (eda.sch_Event.isEventListenerAlreadyExist('Selected')) {
-		const result = eda.sch_Event.removeEventListener('Selected');
+	if (eda.sch_Event.isEventListenerAlreadyExist('getOrSetNet')) {
+		const result = eda.sch_Event.removeEventListener('getOrSetNet');
 		console.log('removeEventListener', result);
 	}
 });
@@ -37,22 +37,20 @@ async function getOrSetNetName() {
 		if (type === 'Component') {
 			const comp = await eda.sch_PrimitiveComponent.get(id);
 			console.log('getOrSetNetName', id, comp);
-			comp.forEach((item) => {
-				if (['netport', 'offPageConnector', 'netflag'].includes(item.getState_ComponentType())) {
-					if (CurrentStatus === GET) {
-						NetNames.push(item.getState_Net());
-						tempStatus = SET;
-					}
-					else {
-						if (NetNames.length === 0) {
-							return;
-						}
-						const netName = NetNames.shift();
-						item.setState_Name(netName);
-						item.done();
-					}
+			if (['netport', 'offPageConnector', 'netflag'].includes(comp.getState_ComponentType())) {
+				if (CurrentStatus === GET) {
+					NetNames.push(comp.getState_Net());
+					tempStatus = SET;
 				}
-			});
+				else {
+					if (NetNames.length === 0) {
+						return;
+					}
+					const netName = NetNames.shift();
+					comp.setState_Name(netName);
+					comp.done();
+				}
+			}
 		}
 	}
 	CurrentStatus = tempStatus;

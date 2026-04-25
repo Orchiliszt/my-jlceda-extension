@@ -212,14 +212,12 @@ function changeSelectedNetName() {
 				const comp = await eda.sch_PrimitiveComponent.get(id);
 				console.log('changeSelectedNetName', id, comp);
 				const tempNetName = [];
-				comp.forEach((item) => {
-					tempNetName.push(item.getState_Net());
-					if (['netport', 'offPageConnector', 'netflag'].includes(item.getState_ComponentType())) {
-						item.setState_Name(currentNetName);
-						item.done();
-						tempUpdateFlag = updateFlag = true;
-					}
-				});
+				tempNetName.push(comp.getState_Net());
+				if (['netport', 'offPageConnector', 'netflag'].includes(comp.getState_ComponentType())) {
+					comp.setState_Name(currentNetName);
+					comp.done();
+					tempUpdateFlag = updateFlag = true;
+				}
 				if (tempUpdateFlag)
 					oldNetName.push({ id, netNames: tempNetName });
 			}
@@ -275,16 +273,14 @@ async function undoChangeOnce() {
 			const comp = await eda.sch_PrimitiveComponent.get(id);
 			console.log('undoChangeOnce', id, comp);
 
-			comp.forEach((item, index) => {
-				const componentType = item.getState_ComponentType();
-				if (['netport', 'netflag'].includes(componentType)) {
-					item.setState_Name(netNames[index]);
-					item.done();
-				}
-				else if (componentType === 'offPageConnector') {
-					eda.sys_Message.showToastMessage('暂不支持撤销对跨页链接标识的修改', 'info', 3);
-				}
-			});
+			const componentType = comp.getState_ComponentType();
+			if (['netport', 'netflag'].includes(componentType)) {
+				comp.setState_Name(netNames[0]);
+				comp.done();
+			}
+			else if (componentType === 'offPageConnector') {
+				eda.sys_Message.showToastMessage('暂不支持撤销对跨页链接标识的修改', 'info', 3);
+			}
 		}
 		else if (type === 'netlabel') {
 			const result = await eda.sch_PrimitiveText.modify(id, { content: netNames[0] });

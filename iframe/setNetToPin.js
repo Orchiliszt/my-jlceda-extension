@@ -13,7 +13,7 @@ getBtn.addEventListener('click', async () => {
 	}
 	generatorInput.value = '请点击元件提取引脚信息';
 	eda.pcb_Event.addMouseEventListener(
-		'SelectedPCB',
+		'setNetToPinPCB',
 		'selected',
 		async () => {
 			const comps = await eda.pcb_SelectControl.getAllSelectedPrimitives();
@@ -45,18 +45,18 @@ setBtn.addEventListener('click', async () => {
 		return;
 	}
 	generatorInput.value = '请选择放置网络端口的元件';
-	eda.sch_Event.addMouseEventListener('SelectedSCH', 'selected', setNetToPin, true);
+	eda.sch_Event.addMouseEventListener('setNetToPinSCH', 'selected', setNetToPin, true);
 });
 
 cancelBtn.addEventListener('click', () => {
 	CompPinList = {};
 	generatorInput.value = `当前可用的元件引脚列表:${Object.keys(CompPinList).length}`;
-	if (eda.sch_Event.isEventListenerAlreadyExist('SelectedSCH')) {
-		const result = eda.sch_Event.removeEventListener('SelectedSCH');
+	if (eda.sch_Event.isEventListenerAlreadyExist('setNetToPinSCH')) {
+		const result = eda.sch_Event.removeEventListener('setNetToPinSCH');
 		console.log('removeEventListener sch', result);
 	}
-	if (eda.pcb_Event.isEventListenerAlreadyExist('SelectedPCB')) {
-		const result = eda.pcb_Event.removeEventListener('SelectedPCB');
+	if (eda.pcb_Event.isEventListenerAlreadyExist('setNetToPinPCB')) {
+		const result = eda.pcb_Event.removeEventListener('setNetToPinPCB');
 		console.log('removeEventListener pcb', result);
 	}
 });
