@@ -69,3 +69,17 @@ export function setNetToPin(): void {
 		},
 	});
 }
+
+export function netClassHelper(): void {
+	eda.sys_IFrame.openIFrame('./iframe/netClassHelper.html', 340, 400, 'netClassHelperWindow', {
+		buttonCallbackFn: (e: string) => {
+			if (e === 'close') {
+				console.log('netClassHelperWindow closed');
+				if (eda.pcb_Event.isEventListenerAlreadyExist('netClassHelper')) {
+					const result = eda.pcb_Event.removeEventListener('netClassHelper');
+					console.log('netClassHelperWindow removeEventListener', result);
+				}
+			}
+		},
+	});
+}

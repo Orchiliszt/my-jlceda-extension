@@ -1,35 +1,53 @@
 <!doctype html>
-<html lang="zh-Hans">
+<html lang="zh-CN">
 	<head>
-		<title>辅助修改网络端口设置</title>
-		<meta charset="utf-8" />
+		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<link rel="stylesheet" href="/iframe/index.css" />
+		<title>网络类/等长网络组 - 管理工具</title>
+		<link rel="stylesheet" href="/iframe/netClassHelper.css" />
 	</head>
 	<body>
-		<div class="card">
-			<!-- 动态行卡片区域（默认显示） -->
-			<div id="rowsContainer"></div>
-			<!-- 生成器视图：只显示一个输入框（初始隐藏） -->
-			<div id="generatorView" class="hidden">
-				<input type="text" id="generatorInput" readonly title="待修改为的网络名" />
+		<div class="app-container">
+			<div class="toast" id="toast"></div>
+
+			<!-- 顶部单选 -->
+			<div class="radio-section">
+				<label class="radio-label"> <input type="radio" name="categoryType" value="netClass" checked /> 网络类 </label>
+				<label class="radio-label"> <input type="radio" name="categoryType" value="netGroup" /> 等长网络组 </label>
+			</div>
+
+			<!-- 下拉输入框 -->
+			<div class="combobox-section">
+				<div class="combobox-wrapper" id="comboboxWrapper">
+					<input type="text" class="combobox-input" id="comboboxInput" placeholder="请选择或输入名称..." autocomplete="off" />
+					<span class="combobox-arrow" id="comboboxArrow">▼</span>
+					<ul class="combobox-dropdown" id="comboboxDropdown"></ul>
+				</div>
+			</div>
+
+			<!-- 筛选框 -->
+			<div class="filter-section">
+				<input type="text" class="filter-input" id="filterInput" placeholder="筛选网络名（模糊匹配，空则全选）..." autocomplete="off" />
+			</div>
+
+			<!-- 列表区域 -->
+			<div class="list-section">
+				<div class="list-container" id="listContainer" tabindex="0">
+					<div class="list-inner" id="listInner">
+						<div class="list-placeholder">请先选择一个网络类或等长网络组</div>
+					</div>
+				</div>
+				<div class="list-count-hint" id="listCountHint"></div>
+			</div>
+
+			<!-- 底部按钮栏（新增应用按钮） -->
+			<div class="bottom-bar">
+				<button class="btn btn-add" id="btnAdd">开始添加</button>
+				<button class="btn btn-remove" id="btnRemove">移除</button>
+				<button class="btn btn-stop" id="btnStop">停止</button>
+				<button class="btn btn-apply" id="btnApply" disabled>应用</button>
 			</div>
 		</div>
-
-		<!-- 主底部按钮栏（开始/取消） -->
-		<div class="button-bar" id="mainBar">
-			<button type="button" id="start">开始</button>
-			<button type="button" id="cancel">取消</button>
-		</div>
-
-		<!-- 生成器底部按钮栏（自动递增/下一个/返回）初始隐藏 -->
-		<div class="button-bar hidden" id="generatorBar">
-			<label> <input type="checkbox" id="autoIncrement" /> 自动递增 </label>
-			<button type="button" id="nextBtn">下一个</button>
-			<button type="button" id="preBtn">上一个</button>
-			<button type="button" id="undoBtn">撤销</button>
-			<button type="button" id="backBtn">返回</button>
-		</div>
 	</body>
-	<script src="/iframe/index.js"></script>
+	<script src="/iframe/netClassHelper.js"></script>
 </html>

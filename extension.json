@@ -3,7 +3,7 @@
 	"uuid": "5ef23c067da94203b5edfaffcde84edb",
 	"displayName": "网络修改工具",
 	"description": "原理图网络标签修改辅助工具",
-	"version": "1.0.1",
+	"version": "1.0.2",
 	"publisher": "lzq",
 	"engines": {
 		"eda": "^3.2.117"
@@ -27,7 +27,7 @@
 		"home": [],
 		"sch": [
 			{
-				"id": "Net Toolkit",
+				"id": "Net Toolkit SCH",
 				"title": "网络辅助工具",
 				"menuItems": [
 					{
@@ -50,13 +50,18 @@
 		],
 		"pcb": [
 			{
-				"id": "Net Toolkit",
+				"id": "Net Toolkit PCB",
 				"title": "网络辅助工具",
 				"menuItems": [
 					{
 						"id": "Set Net To Pin",
 						"title": "放置网络端口到引脚",
 						"registerFn": "setNetToPin"
+					},
+					{
+						"id": "Net Class Helper",
+						"title": "网络类辅助工具",
+						"registerFn": "netClassHelper"
 					}
 				]
 			}
