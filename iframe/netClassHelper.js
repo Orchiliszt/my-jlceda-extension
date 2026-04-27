@@ -136,7 +136,6 @@ function selectCategory(name) {
 
 	filterInput.value = '';
 	applyFilterAndRender();
-	updateButtonStates();
 }
 
 // 筛选
@@ -228,9 +227,9 @@ function updateButtonStates() {
 
 	btnRemove.disabled = !hasSelection;
 	btnApply.disabled = !hasPending;
-	// 开始添加/停止始终保持可点击（内部状态切换）
-	btnAdd.disabled = false;
-	btnStop.disabled = false;
+
+	btnAdd.disabled = isAddingMode;
+	btnStop.disabled = !isAddingMode;
 }
 
 // 多选处理（Ctrl/Shift）
@@ -269,17 +268,21 @@ function handleItemClick(idx, event) {
 // ==================== 按钮逻辑 ====================
 // 开始添加（留白监听函数）
 btnAdd.addEventListener('click', () => {
+	if (isAddingMode)
+		return;
 	isAddingMode = true;
 	// 用户可在此处绑定外部事件监听，通过调用 addNetworkName(name) 添加网络名
-	userStartAdding();
+	startAdding();
 	showToast('已开启添加模式，可调用 addNetworkName(name) 添加网络名');
 	updateButtonStates();
 });
 
 // 停止（留白监听函数）
 btnStop.addEventListener('click', () => {
+	if (!isAddingMode)
+		return;
 	isAddingMode = false;
-	userStopAdding();
+	stopAdding();
 	showToast('已停止添加模式');
 	updateButtonStates();
 });
@@ -351,7 +354,7 @@ btnApply.addEventListener('click', () => {
 	pendingAdded.clear();
 	pendingRemoved.clear();
 	// 用户可在此处同步数据至后端/本地存储等
-	userApplyChanges();
+	applyChanges();
 	showToast('更改已应用');
 	applyFilterAndRender();
 });
@@ -387,17 +390,16 @@ function addNetworkName(name) {
 }
 
 // 留白函数（用户可覆盖）
-function userStartAdding() {
+function startAdding() {
 	// 用户可在此绑定事件监听，例如 window.addEventListener('customEvent', handler)
 	const a = prompt('请输入网络名'); // eslint-disable-line	no-alert
 	if (a)
 		addNetworkName(a);
-	addNetworkName(a);
 }
-function userStopAdding() {
+function stopAdding() {
 	// 用户可在此移除事件监听
 }
-function userApplyChanges() {
+function applyChanges() {
 	// 用户可在此同步数据到数据源，例如发送请求或更新dataMap
 }
 
@@ -458,7 +460,7 @@ comboboxInput.addEventListener('keydown', (e) => {
 			first.focus();
 
 		// 在下拉框上绑定键盘事件，处理后续的上下移动和回车选择（仅绑定一次）
-		if (!comboboxDropdown._dropdownKeyBound) {
+		if (!comboboxDropdown?._dropdownKeyBound) {
 			comboboxDropdown._dropdownKeyBound = true;
 			comboboxDropdown.addEventListener('keydown', (ev) => {
 				if (ev.key === 'ArrowDown' || ev.key === 'ArrowUp') {
@@ -517,7 +519,7 @@ comboboxWrapper.addEventListener('focusout', () => {
 			}
 			closeDropdown();
 		}
-	}, 200);
+	}, 100);
 });
 
 document.addEventListener('mousedown', (e) => {
@@ -574,7 +576,6 @@ function switchCategoryType(newType) {
 	}
 	filterInput.value = '';
 	applyFilterAndRender();
-	updateButtonStates();
 }
 
 radioNetClass.addEventListener('change', () => {
@@ -604,7 +605,6 @@ function init() {
 	filterInput.value = '';
 	closeDropdown();
 	applyFilterAndRender();
-	updateButtonStates();
 }
 
 init();
