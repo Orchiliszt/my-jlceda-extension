@@ -13,12 +13,13 @@ export default antfu({
 
 	rules: {
 		'no-console': 'off',
+		// 'brace-style': ['off', '1tbs']
 	},
 
 	languageOptions: {
 		globals: {
 			eda: 'readonly',
-			EDMT_EditorDocumentType: 'readonly',
+			EPCB_MouseEventType: 'readonly',
 		},
 	},
 

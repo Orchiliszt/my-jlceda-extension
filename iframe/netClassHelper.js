@@ -267,22 +267,47 @@ function handleItemClick(idx, event) {
 
 // ==================== 按钮逻辑 ====================
 // 开始添加（留白监听函数）
-btnAdd.addEventListener('click', () => {
+btnAdd.addEventListener('click', async () => {
 	if (isAddingMode)
 		return;
 	isAddingMode = true;
 	// 用户可在此处绑定外部事件监听，通过调用 addNetworkName(name) 添加网络名
-	startAdding();
-	showToast('已开启添加模式，可调用 addNetworkName(name) 添加网络名');
+	if (await eda.pcb_Event.isEventListenerAlreadyExist('netClassHelper')) {
+		showToast('已开启添加模式, 若无法停止建议关闭插件并重启软件');
+		return;
+	}
+	await eda.pcb_Event.addMouseEventListener('netClassHelper', 'selected', async (e) => {
+		console.log('netClassHelper', e);
+		const selected = await eda.pcb_SelectControl.getAllSelectedPrimitives();
+		console.log('netClassHelper selected:', selected);
+		if (selected.length === 0) {
+			return;
+		}
+		for (const item of selected) {
+			const net = item?.net;
+			if (net)
+				addNetworkName(net);
+			else showToast('请选择存在网络的导线、焊盘、铺铜等获取网络');
+		}
+	});
+
+	showToast('已开启添加模式');
 	updateButtonStates();
 });
 
 // 停止（留白监听函数）
-btnStop.addEventListener('click', () => {
+btnStop.addEventListener('click', async () => {
 	if (!isAddingMode)
 		return;
+	if (await eda.pcb_Event.isEventListenerAlreadyExist('netClassHelper')) {
+		const result = await eda.pcb_Event.removeEventListener('netClassHelper');
+		console.log('netClassHelper removeEventListener', result);
+		if (!result) {
+			showToast('停止添加模式失败, 建议重启软件');
+			return;
+		}
+	}
 	isAddingMode = false;
-	stopAdding();
 	showToast('已停止添加模式');
 	updateButtonStates();
 });
@@ -317,10 +342,10 @@ btnRemove.addEventListener('click', () => {
 		});
 	}
 	else {
-		// 混合状态：将未待删除的标记为待删除，已待删除的不变（或取消？按需求简化：标记所有为待删除）
+		// 混合状态：将未待删除的标记为待删除，已待删除的不变
 		selectedNames.forEach((n) => {
 			if (!pendingRemoved.has(n)) {
-				// 如果它在新添加集合中，先移除新添加标记再标记为待删除（逻辑上不能同时存在）
+				// 如果它在新添加集合中，先移除新添加标记再删除（逻辑上不能同时存在）
 				if (pendingAdded.has(n)) {
 					pendingAdded.delete(n);
 					// 从数据源中移除该添加项（因为还没应用）
@@ -387,17 +412,6 @@ function addNetworkName(name) {
 	lastClickIndex = -1;
 	applyFilterAndRender();
 	// showToast(`已临时添加: ${name}`);
-}
-
-// 留白函数（用户可覆盖）
-function startAdding() {
-	// 用户可在此绑定事件监听，例如 window.addEventListener('customEvent', handler)
-	const a = prompt('请输入网络名'); // eslint-disable-line	no-alert
-	if (a)
-		addNetworkName(a);
-}
-function stopAdding() {
-	// 用户可在此移除事件监听
 }
 function applyChanges() {
 	// 用户可在此同步数据到数据源，例如发送请求或更新dataMap

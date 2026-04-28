@@ -926,3 +926,166 @@ eda.sys_Message.showToastMessage(`因修改端口的原点可能和默认端口�
 eda.sys_Message.showToastMessage(`删除端口${delCount}个, 新增端口${addCount}个`, 'info', 5);
 
 
+const PCB_GraphicElement = [
+    {
+        "async": true,
+        "primitiveType": "Polyline",
+        "net": "A-0_S",
+        "layer": 1,
+        "polygon": {
+            "polygon": [
+                745,
+                1465,
+                "L",
+                890,
+                1465,
+                895,
+                1460
+            ]
+        },
+        "lineWidth": 10,
+        "primitiveLock": false,
+        "primitiveId": "7f7f64039808b97e"
+    },
+    {
+        "async": true,
+        "primitiveType": "Region",
+        "layer": 1,
+        "complexPolygon": {
+            "polygon": [
+                777.2234,
+                1435,
+                "L",
+                865,
+                1435,
+                900,
+                1400,
+                900,
+                1340,
+                880,
+                1320,
+                800,
+                1320,
+                777.2234,
+                1342.7766,
+                777.2234,
+                1435
+            ]
+        },
+        "ruleType": [
+            2
+        ],
+        "regionName": "Copper Region",
+        "lineWidth": 0.2,
+        "primitiveLock": false,
+        "primitiveId": "074b37cc03361e60"
+    },
+    {
+        "async": true,
+        "primitiveType": "Pad",
+        "layer": 1,
+        "padNumber": "11",
+        "x": 640,
+        "y": 1241.7,
+        "rotation": 0,
+        "pad": [
+            "OVAL",
+            24.8,
+            63.6
+        ],
+        "net": "VCC",
+        "hole": null,
+        "holeOffsetX": 0,
+        "holeOffsetY": 0,
+        "holeRotation": 0,
+        "metallization": true,
+        "padType": 1,
+        "specialPad": [],
+        "solderMaskAndPasteMaskExpansion": {
+            "topSolderMask": 2,
+            "bottomSolderMask": 2
+        },
+        "heatWelding": null,
+        "primitiveLock": false,
+        "primitiveId": "9c679f3dc7ce2c45e25"
+    },
+    {
+        "async": true,
+        "primitiveType": "Pad",
+        "layer": 1,
+        "padNumber": "TP1",
+        "x": 640,
+        "y": 1305,
+        "rotation": 0,
+        "pad": [
+            "ELLIPSE",
+            24,
+            24
+        ],
+        "net": "VCC",
+        "hole": null,
+        "holeOffsetX": 0,
+        "holeOffsetY": 0,
+        "holeRotation": 0,
+        "metallization": true,
+        "padType": 1,
+        "specialPad": [],
+        "solderMaskAndPasteMaskExpansion": {
+            "topSolderMask": 2,
+            "bottomSolderMask": 2
+        },
+        "heatWelding": null,
+        "primitiveLock": false,
+        "primitiveId": "1d58bda4068b7bdb"
+    },
+    {
+        "async": true,
+        "primitiveType": "Line",
+        "net": "$1N2",
+        "layer": 1,
+        "startX": 590,
+        "startY": 1331.4,
+        "endX": 590,
+        "endY": 1241.7,
+        "lineWidth": 10,
+        "primitiveLock": false,
+        "primitiveId": "a947431cf3e2cb07"
+    },
+    {
+        "async": true,
+        "primitiveType": "Via",
+        "net": "$1N2",
+        "x": 590,
+        "y": 1331.4,
+        "holeDiameter": 12,
+        "diameter": 24,
+        "viaType": 0,
+        "designRuleBlindViaName": "",
+        "solderMaskExpansion": null,
+        "primitiveLock": false,
+        "primitiveId": "ccec8b619bb6b872"
+    },
+    {
+        "async": true,
+        "primitiveType": "Region",
+        "layer": 1,
+        "complexPolygon": {
+            "polygon": [
+                "R",
+                680,
+                1285,
+                65,
+                75,
+                0,
+                0
+            ]
+        },
+        "ruleType": [
+            2
+        ],
+        "regionName": "Fill Region",
+        "lineWidth": 0.2,
+        "primitiveLock": false,
+        "primitiveId": "727afedac03f47c3"
+    }
+]
