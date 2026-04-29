@@ -1,19 +1,7 @@
 // ==================== 数据 ====================
 const dataMap = {
-	netClass: {
-		Backbone_Class: ['NET_BB_001', 'NET_BB_002', 'NET_BB_003', 'NET_BB_004', 'NET_BB_005', 'NET_BB_006'],
-		Access_Class: ['NET_ACC_001', 'NET_ACC_002', 'NET_ACC_003', 'NET_ACC_004'],
-		Core_Class: ['NET_CORE_001', 'NET_CORE_002', 'NET_CORE_003', 'NET_CORE_004', 'NET_CORE_005'],
-		Distribution_Class: ['NET_DIST_001', 'NET_DIST_002', 'NET_DIST_003'],
-		Edge_Class: ['NET_EDGE_001', 'NET_EDGE_002', 'NET_EDGE_003', 'NET_EDGE_004', 'NET_EDGE_005', 'NET_EDGE_006', 'NET_EDGE_007'],
-	},
-	netGroup: {
-		Group_Alpha: ['NET_AL_01', 'NET_AL_02', 'NET_AL_03', 'NET_AL_04', 'NET_AL_05'],
-		Group_Beta: ['NET_BT_01', 'NET_BT_02', 'NET_BT_03'],
-		Group_Gamma: ['NET_GM_01', 'NET_GM_02', 'NET_GM_03', 'NET_GM_04'],
-		Group_Delta: ['NET_DL_01', 'NET_DL_02', 'NET_DL_03', 'NET_DL_04', 'NET_DL_05', 'NET_DL_06'],
-		Group_Epsilon: ['NET_EP_01', 'NET_EP_02', 'NET_EP_03', 'NET_EP_04'],
-	},
+	netClass: {},
+	netGroup: {},
 };
 
 // DOM
@@ -31,10 +19,13 @@ const btnAdd = document.getElementById('btnAdd');
 const btnRemove = document.getElementById('btnRemove');
 const btnStop = document.getElementById('btnStop');
 const btnApply = document.getElementById('btnApply');
-const toast = document.getElementById('toast');
+const btnRefresh = document.getElementById('btnRefresh');
+
+const NetClass = 'netClass';
+const NetGroup = 'netGroup';
 
 // 状态
-let currentCategoryType = 'netClass';
+let currentCategoryType = NetClass;
 let currentCategoryName = null;
 let currentNetworkNames = []; // 当前组的所有网络名（不含筛选）
 let activeNetworkNames = []; // 筛选后的列表
@@ -57,16 +48,8 @@ const lastSelectedGroup = {
 };
 
 // Toast
-let toastTimer;
-function showToast(msg) {
-	if (toastTimer)
-		clearTimeout(toastTimer);
-	toast.textContent = msg;
-	toast.classList.add('show');
-	toastTimer = setTimeout(() => {
-		toast.classList.remove('show');
-		toastTimer = null;
-	}, 1500);
+function showToast(msg, type = 'info', timer = 5) {
+	eda.sys_Message.showToastMessage(`网络类助手: ${msg}`, type, timer);
 }
 
 // 获取当前类型的所有组名
@@ -271,11 +254,11 @@ btnAdd.addEventListener('click', async () => {
 	if (isAddingMode)
 		return;
 	isAddingMode = true;
-	// 用户可在此处绑定外部事件监听，通过调用 addNetworkName(name) 添加网络名
 	if (await eda.pcb_Event.isEventListenerAlreadyExist('netClassHelper')) {
-		showToast('已开启添加模式, 若无法停止建议关闭插件并重启软件');
+		showToast('添加模式已经启动, 若无法停止建议关闭插件并重启软件', 'warn');
 		return;
 	}
+	// 绑定鼠标选中事件监听
 	await eda.pcb_Event.addMouseEventListener('netClassHelper', 'selected', async (e) => {
 		console.log('netClassHelper', e);
 		const selected = await eda.pcb_SelectControl.getAllSelectedPrimitives();
@@ -291,7 +274,7 @@ btnAdd.addEventListener('click', async () => {
 		}
 	});
 
-	showToast('已开启添加模式');
+	showToast('已开启添加模式', 'success');
 	updateButtonStates();
 });
 
@@ -303,12 +286,12 @@ btnStop.addEventListener('click', async () => {
 		const result = await eda.pcb_Event.removeEventListener('netClassHelper');
 		console.log('netClassHelper removeEventListener', result);
 		if (!result) {
-			showToast('停止添加模式失败, 建议重启软件');
+			showToast('停止添加模式失败, 建议关闭插件或重启软件以消除副作用', 'error');
 			return;
 		}
 	}
 	isAddingMode = false;
-	showToast('已停止添加模式');
+	showToast('添加模式已停止', 'success');
 	updateButtonStates();
 });
 
@@ -367,20 +350,50 @@ btnRemove.addEventListener('click', () => {
 });
 
 // 应用按钮：提交所有临时更改（数据同步部分留白）
-btnApply.addEventListener('click', () => {
+btnApply.addEventListener('click', async () => {
+	let removeFuncName = '';
+	let addFuncName = '';
+	if (currentCategoryType === NetClass) {
+		removeFuncName = 'removeNetFromNetClass';
+		addFuncName = 'addNetToNetClass';
+	}
+	else if (currentCategoryType === NetGroup) {
+		removeFuncName = 'removeNetFromEqualLengthNetGroup';
+		addFuncName = 'addNetToEqualLengthNetGroup';
+	}
+	else {
+		return;
+	}
 	// 执行删除
 	for (const name of pendingRemoved) {
-		const idx = currentNetworkNames.indexOf(name);
-		if (idx !== -1)
-			currentNetworkNames.splice(idx, 1);
+		const removeResult = await eda.pcb_Drc[removeFuncName](currentCategoryName, name);
+		if (!removeResult)
+			showToast(`移除网络失败: ${name}`, 'warn');
 	}
-	// 新添加的网络名保留在currentNetworkNames中（已添加过）
+	// 执行添加
+	for (const name of pendingAdded) {
+		const addResult = await eda.pcb_Drc[addFuncName](currentCategoryName, name);
+		if (!addResult)
+			showToast(`添加网络失败: ${name}`, 'warn');
+	}
+
 	// 清空临时集合
 	pendingAdded.clear();
 	pendingRemoved.clear();
-	// 用户可在此处同步数据至后端/本地存储等
-	applyChanges();
-	showToast('更改已应用');
+	showToast('更改已应用', 'success');
+	// 重新获取数据
+	getData();
+	applyFilterAndRender();
+});
+
+btnRefresh.addEventListener('click', async () => {
+	if (!(await getData())) {
+		showToast('获取网络类/等长网络组数据失败, 请重启插件', 'error');
+		return;
+	}
+	showToast('已刷新数据', 'success');
+	selectedIndices.clear();
+	lastClickIndex = -1;
 	applyFilterAndRender();
 });
 
@@ -396,25 +409,74 @@ function addNetworkName(name) {
 	}
 	// 如果已存在且不在待删除中，则不重复添加
 	if (currentNetworkNames.includes(name) && !pendingRemoved.has(name)) {
-		showToast('网络名已存在');
+		showToast('网络已存在');
 		return;
+	}
+	for (const [categoryName, nets] of Object.entries(dataMap[currentCategoryType])) {
+		if (nets.includes(name)) {
+			showToast(`网络归属于: ${categoryName}, 请移除其归属后重试`);
+			return;
+		}
 	}
 	// 如果处于待删除状态，移除待删除并加入待添加
 	if (pendingRemoved.has(name)) {
 		pendingRemoved.delete(name);
 	}
 	// 加入数据列表和待添加集合
-	if (!currentNetworkNames.includes(name)) {
-		currentNetworkNames.push(name);
-	}
+
+	currentNetworkNames.push(name);
 	pendingAdded.add(name);
 	selectedIndices.clear();
 	lastClickIndex = -1;
 	applyFilterAndRender();
 	// showToast(`已临时添加: ${name}`);
 }
-function applyChanges() {
-	// 用户可在此同步数据到数据源，例如发送请求或更新dataMap
+
+// ==================== 数据获取 ====================
+// false 表示获取数据失败
+async function getData() {
+	const allNetGroup = await eda.pcb_Drc.getAllEqualLengthNetGroups();
+	const allNetClass = await eda.pcb_Drc.getAllNetClasses();
+	if (!allNetGroup || !allNetClass) {
+		return false;
+	}
+	dataMap.netClass = {};
+	dataMap.netGroup = {};
+
+	for (const group of allNetGroup) {
+		dataMap.netGroup[group.name] = group.nets;
+	}
+	for (const cls of allNetClass) {
+		dataMap.netClass[cls.name] = cls.nets;
+	}
+	if (currentCategoryName) {
+		const data = dataMap[currentCategoryType][currentCategoryName];
+		currentNetworkNames = data ? [...data] : [];
+		currentCategoryName = data ? currentCategoryName : null;
+		comboboxInput.value = currentCategoryName;
+	}
+	if (lastSelectedGroup.netClass && !dataMap.netClass[lastSelectedGroup.netClass]) {
+		lastSelectedGroup.netClass = null;
+	}
+	if (lastSelectedGroup.netGroup && !dataMap.netGroup[lastSelectedGroup.netGroup]) {
+		lastSelectedGroup.netGroup = null;
+	}
+
+	if (pendingAdded.size > 0) {
+		for (const name of pendingAdded) {
+			if (currentNetworkNames.includes(name)) {
+				currentNetworkNames.delete(name);
+			}
+		}
+	}
+	if (pendingRemoved.size > 0) {
+		for (const name of pendingRemoved) {
+			if (!currentNetworkNames.includes(name)) {
+				currentNetworkNames.delete(name);
+			}
+		}
+	}
+	return true;
 }
 
 // ==================== Combobox事件 ====================
@@ -594,16 +656,16 @@ function switchCategoryType(newType) {
 
 radioNetClass.addEventListener('change', () => {
 	if (radioNetClass.checked)
-		switchCategoryType('netClass');
+		switchCategoryType(NetClass);
 });
 radioNetGroup.addEventListener('change', () => {
 	if (radioNetGroup.checked)
-		switchCategoryType('netGroup');
+		switchCategoryType(NetGroup);
 });
 
 // 初始化
 function init() {
-	currentCategoryType = 'netClass';
+	currentCategoryType = NetClass;
 	radioNetClass.checked = true;
 	radioNetGroup.checked = false;
 
@@ -618,7 +680,12 @@ function init() {
 	isAddingMode = false;
 	filterInput.value = '';
 	closeDropdown();
-	applyFilterAndRender();
+	getData().then((ok) => {
+		if (!ok) {
+			showToast('获取网络类/等长网络组数据失败,请尝试手动刷新或重启插件', 'error');
+		}
+		applyFilterAndRender();
+	});
 }
 
 init();

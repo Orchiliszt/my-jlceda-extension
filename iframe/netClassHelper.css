@@ -390,6 +390,18 @@ body {
 	transform: scale(0.97);
 }
 
+.btn-refresh {
+	background: var(--primary-light);
+	color: #1d4ed8;
+	border: 1.5px solid #c5d5f8;
+	/* 圆角 */
+	border-radius: 18px;	
+}
+
+.btn-refresh:hover {
+	background:#d8dfee
+}
+
 .btn-add {
 	background: #3b6df0;
 	color: #fff;
