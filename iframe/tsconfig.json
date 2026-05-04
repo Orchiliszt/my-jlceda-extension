@@ -1,0 +1,12 @@
+{
+	"compilerOptions": {
+		"target": "ESNEXT",
+		"rootDir": "./", // iframe 源码目录
+		"module": "commonjs",
+		"strict": true,
+		"outDir": "../dist", // 输出目录
+		"esModuleInterop": true
+	},
+	"include": ["./*.ts", "../node_modules/@jlceda/pro-api-types/**/*"],
+	"exclude": ["node_modules"]
+}

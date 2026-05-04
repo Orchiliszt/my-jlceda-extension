@@ -4,20 +4,33 @@
 		<title>设置网络端口到引脚</title>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<link rel="stylesheet" href="/iframe/index.css" />
+		<link rel="stylesheet" href="/iframe/setNetToPin.css" />
 	</head>
 	<body>
-		<div class="card">
-			<!-- 动态行卡片区域（默认显示） -->
-			<div id="rowsContainer">
-				<textarea id="generatorInput" rows="5" style="height: auto"></textarea>
+		<div class="app-container">
+			<div class="toast" id="toast"></div>
+
+			<!-- 头部统计 -->
+			<div class="header">
+				<!-- <div class="header-left"><span>📌</span> 引脚网络映射</div> -->
+				<div class="header-left">元件引脚列表:<span class="count" id="totalParts">0</span></div>
+				<div class="stats">
+					<span class="stat-badge">映射 <span class="count" id="totalMappings">0</span></span>
+					<span class="stat-badge placed">已放置 <span class="count" id="totalPlaced">0</span></span>
+				</div>
 			</div>
-		</div>
-		<!-- 主底部按钮栏（开始/取消） -->
-		<div class="button-bar" id="mainBar">
-			<button type="button" id="get">提取</button>
-			<button type="button" id="set">放置</button>
-			<button type="button" id="cancel">清除</button>
+
+			<!-- 可折叠的器件列表 -->
+			<div class="content-section" id="partListContainer">
+				<div class="no-data">暂无数据，请点击“提取”</div>
+			</div>
+
+			<!-- 底部按钮 -->
+			<div class="bottom-bar">
+				<button class="btn btn-extract" id="btnExtract">提取</button>
+				<button class="btn btn-place" id="btnPlace">放置</button>
+				<button class="btn btn-clear" id="btnClear">清除</button>
+			</div>
 		</div>
 	</body>
 	<script src="/dist/setNetToPin.js"></script>

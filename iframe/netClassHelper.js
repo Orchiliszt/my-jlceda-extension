@@ -248,6 +248,21 @@ function handleItemClick(idx, event) {
 	applyFilterAndRender();
 }
 
+async function addHelper() {
+	const selected = await eda.pcb_SelectControl.getAllSelectedPrimitives();
+	console.log('netClassHelper selected:', selected);
+	if (selected.length === 0) {
+		return;
+	}
+	for (const item of selected) {
+		const net = item?.net;
+		if (net)
+			addNetworkName(net);
+		else showToast('请选择存在网络的导线、焊盘、铺铜等获取网络');
+	}
+}
+const debAddHelper = debounceAsync(addHelper);
+
 // ==================== 按钮逻辑 ====================
 // 开始添加（留白监听函数）
 btnAdd.addEventListener('click', async () => {
@@ -259,18 +274,19 @@ btnAdd.addEventListener('click', async () => {
 		return;
 	}
 	// 绑定鼠标选中事件监听
-	await eda.pcb_Event.addMouseEventListener('netClassHelper', 'selected', async (e) => {
-		console.log('netClassHelper', e);
-		const selected = await eda.pcb_SelectControl.getAllSelectedPrimitives();
-		console.log('netClassHelper selected:', selected);
-		if (selected.length === 0) {
-			return;
+	await eda.pcb_Event.addMouseEventListener('netClassHelper', 'selected', async () => {
+		try {
+			await debAddHelper();
 		}
-		for (const item of selected) {
-			const net = item?.net;
-			if (net)
-				addNetworkName(net);
-			else showToast('请选择存在网络的导线、焊盘、铺铜等获取网络');
+		catch (e) {
+			if (e?.message === 'Debounced cancelled') {
+				console.log('debounceAsync debAddHelper');
+			}
+			else {
+				console.error(e);
+				eda.sys_Log.add(String(e), 'error');
+				showToast('添加失败, 错误详情请查看日志', 'error');
+			}
 		}
 	});
 
@@ -429,7 +445,26 @@ function addNetworkName(name) {
 	selectedIndices.clear();
 	lastClickIndex = -1;
 	applyFilterAndRender();
-	// showToast(`已临时添加: ${name}`);
+	showToast(`已临时添加: ${name}`, undefined, 3);
+}
+
+function debounceAsync(fn, duration = 100) {
+	let timerId;
+	let rejectPrevious; // 可选：取消之前未完成的Promise
+	return function (...args) {
+		if (rejectPrevious)
+			rejectPrevious(new Error('Debounced cancelled'));
+		return new Promise((resolve, reject) => {
+			rejectPrevious = reject;
+			clearTimeout(timerId);
+			timerId = setTimeout(() => {
+				fn.call(this, ...args)
+					.then(resolve)
+					.catch(reject)
+					.finally(() => { rejectPrevious = null; });
+			}, duration);
+		});
+	};
 }
 
 // ==================== 数据获取 ====================

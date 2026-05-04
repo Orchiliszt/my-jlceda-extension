@@ -10,6 +10,7 @@ esbuild.buildSync({
 	outdir: './dist/',
 	format: 'iife',
 	platform: 'browser',
+	target: 'esnext',
 	minify: false,
 	sourcemap: false,
 	loader: {},

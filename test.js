@@ -190,7 +190,6 @@
 // 	true,
 // );
 
-
 // const sch_getAllSelectedPrimitives = [
 // 	{
 // 		'async': true,
@@ -909,7 +908,6 @@
 // eda.sys_Message.showToastMessage(`因修改端口的原点可能和默认端口的不同, 请手动检查修改后的端口`, 'info', 5);
 // eda.sys_Message.showToastMessage(`删除端口${delCount}个, 新增端口${addCount}个`, 'info', 5);
 
-
 // const PCB_GraphicElement = [
 //     {
 //         "async": true,
@@ -1073,3 +1071,4 @@
 //         "primitiveId": "727afedac03f47c3"
 //     }
 // ]
+

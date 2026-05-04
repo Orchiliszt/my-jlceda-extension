@@ -1,519 +1,621 @@
-<!doctype html>
-<html lang="zh-Hans">
-	<head>
-		<meta charset="UTF-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title>辅助修改设置 · 动态生成</title>
-		<style>
-			* {
-				box-sizing: border-box;
-				font-family:
-					system-ui,
-					-apple-system,
-					'Segoe UI',
-					Roboto,
-					'Helvetica Neue',
-					sans-serif;
-			}
-			body {
-				margin: 0;
-				padding: 0;
-				min-height: 100vh;
-				background: #e2e9f2;
-				display: flex;
-				flex-direction: column;
-			}
-			/* 卡片铺满宽度，无圆角，顶部内边距很小，让行贴顶 */
-			.card {
-				width: 100%;
-				background: white;
-				padding: 8px 14px 4px 14px;
-				box-shadow: 0 4px 12px rgba(0, 20, 30, 0.05);
-				flex: 1 0 auto;
-			}
-			/* 行容器：紧凑垂直排列 */
-			#rowsContainer {
-				display: flex;
-				flex-direction: column;
-				gap: 5px;
-			}
-			/* 每一行：超紧凑内边距，小圆角 */
-			.row {
-				display: flex;
-				flex-wrap: wrap;
-				align-items: center;
-				gap: 5px;
-				background: #f8fafd;
-				padding: 5px 10px;
-				border-radius: 10px;
-				border: 1px solid #d2dfec;
-				transition: 0.1s;
-			}
-			.row:hover {
-				background: #ffffff;
-				border-color: #9fbedc;
-			}
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>引脚网络映射工具</title>
+    <style>
+        :root {
+            --bg: #f5f6f8;
+            --surface: #ffffff;
+            --border: #d5d9e0;
+            --text: #2c3e50;
+            --text-secondary: #6b7280;
+            --primary: #3b6df0;
+            --primary-light: #e8effe;
+            --success: #22c55e;
+            --success-light: #e6f7ed;
+            --success-text: #15803d;
+            --warning: #f59e0b;
+            --warning-light: #fff8e6;
+            --danger: #ef4444;
+            --danger-light: #fef2f2;
+            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.14);
+            --radius: 8px;
+            --radius-sm: 5px;
+            --transition: 0.15s ease;
+        }
 
-			/* 缩小所有控件尺寸：高度28~30px，字体更小 */
-			.row select,
-			.row input {
-				font-size: 0.8rem;
-				border-radius: 10px;
-				padding: 5px 12px;
-				border: 1px solid #b9cee6;
-				background: white;
-				outline: none;
-				height: 30px;
-				line-height: 1.2;
-			}
-			.row select {
-				width: 6em;
-				cursor: pointer;
-				background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="%233d607f" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>');
-				background-repeat: no-repeat;
-				background-position: right 8px center;
-				background-size: 12px;
-				appearance: none;
-				-webkit-appearance: none;
-				padding-right: 28px;
-			}
-			.row input {
-				flex: 2 1 160px;
-				min-width: 140px;
-			}
-			.row input:focus {
-				border-color: #1a73b0;
-				box-shadow: 0 0 0 2px rgba(26, 115, 176, 0.15);
-			}
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-			/* 按钮缩小到30*30，符号大小调整 */
-			.row button {
-				width: 30px;
-				height: 30px;
-				border-radius: 50%;
-				border: none;
-				font-size: 1.5rem;
-				line-height: 1;
-				display: inline-flex;
-				align-items: center;
-				justify-content: center;
-				cursor: pointer;
-				transition: 0.1s;
-				flex-shrink: 0;
-				padding: 0;
-				background: #eaf1f9;
-				color: #1e3b5c;
-				border: 1px solid transparent;
-				box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
-				font-weight: 350;
-			}
-			.row button.add-btn {
-				background: #d9eedf;
-				color: #1a6e3b;
-				border-color: #aad5b8;
-			}
-			.row button.add-btn:hover {
-				background: #bfe4cc;
-				border-color: #57a177;
-			}
-			.row button.delete-btn {
-				background: #fcdcdc;
-				color: #b12b2b;
-				border-color: #f2acac;
-			}
-			.row button.delete-btn:hover {
-				background: #fbc4c4;
-				border-color: #d86f6f;
-			}
-			.row button:active {
-				transform: scale(0.92);
-			}
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: #e8ecf1;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            font-size: 13px;
+            color: var(--text);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
 
-			/* 生成视图的输入框 (在卡片内) */
-			#generatorView {
-				padding: 10px 0;
-			}
-			#generatorInput {
-				width: 100%;
-				height: 38px;
-				padding: 8px 16px;
-				font-size: 1rem;
-				border: 1px solid #b9cee6;
-				border-radius: 20px;
-				background: #f5f9ff;
-				outline: none;
-				box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.02);
-			}
-			#generatorInput:focus {
-				border-color: #1a73b0;
-				box-shadow: 0 0 0 2px rgba(26, 115, 176, 0.15);
-			}
+        .app-container {
+            width: 340px;
+            height: 400px;
+            max-height: 95vh;
+            background: var(--surface);
+            border-radius: 12px;
+            box-shadow: var(--shadow-lg);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            position: relative;
+        }
 
-			/* 底部按钮栏：高度缩小，居中 */
-			.button-bar {
-				display: flex;
-				justify-content: center;
-				gap: 20px;
-				padding: 6px 0; /* 缩小上下内边距 */
-				background: white;
-				border-top: 1px solid #d7e2ee;
-				width: 100%;
-			}
-			.button-bar button {
-				background: #f0f4fa;
-				border: 1px solid #b7cde0;
-				font-size: 0.9rem;
-				padding: 6px 24px; /* 缩小按钮内边距 */
-				border-radius: 20px;
-				color: #1d3a57;
-				font-weight: 500;
-				transition: none;
-				box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
-				min-width: 90px;
-				cursor: pointer;
-			}
-			.button-bar button:hover {
-				background: #15438529;
-				border-color: #0861ae;
-			}
-			/* 生成器按钮栏中的复选框样式 */
-			#generatorBar label {
-				display: inline-flex;
-				align-items: center;
-				gap: 6px;
-				background: #f0f4fa;
-				border: 1px solid #b7cde0;
-				font-size: 0.9rem;
-				padding: 6px 18px;
-				border-radius: 20px;
-				color: #1d3a57;
-				font-weight: 500;
-				cursor: pointer;
-				user-select: none;
-			}
-			#generatorBar input[type='checkbox'] {
-				width: 16px;
-				height: 16px;
-				cursor: pointer;
-				margin: 0;
-			}
+        /* 头部 */
+        .header {
+            padding: 12px 16px 10px 16px;
+            border-bottom: 1px solid #f0f1f3;
+            flex-shrink: 0;
+            background: #fafbfc;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
 
-			/* 隐藏辅助类 */
-			.hidden {
-				display: none !important;
-			}
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text);
+        }
 
-			/* 小屏优化 */
-			@media (max-width: 480px) {
-				.row select {
-					width: 6em;
-				}
-				.row input {
-					min-width: 120px;
-				}
-				.button-bar button {
-					padding: 6px 16px;
-					min-width: 70px;
-				}
-				#generatorBar label {
-					padding: 6px 12px;
-				}
-			}
-		</style>
-	</head>
-	<body>
-		<div class="card">
-			<!-- 动态行卡片区域（默认显示） -->
-			<div id="rowsContainer"></div>
-			<!-- 生成器视图：只显示一个输入框（初始隐藏） -->
-			<div id="generatorView" class="hidden">
-				<input type="text" id="generatorInput" readonly title="下一个" />
-			</div>
-		</div>
+        .stats {
+            display: flex;
+            gap: 8px;
+            font-size: 11px;
+            color: var(--text-secondary);
+        }
 
-		<!-- 主底部按钮栏（开始/取消） -->
-		<div class="button-bar" id="mainBar">
-			<button type="button" id="start">开始</button>
-			<button type="button" id="cancel">取消</button>
-		</div>
+        .stat-badge {
+            background: var(--primary-light);
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
 
-		<!-- 生成器底部按钮栏（自动递增/下一个/返回）初始隐藏 -->
-		<div class="button-bar hidden" id="generatorBar">
-			<label> <input type="checkbox" id="autoIncrement" /> 自动递增 </label>
-			<button type="button" id="nextBtn">下一个</button>
-			<button type="button" id="backBtn">返回</button>
-		</div>
-	</body>
-	<script>
-		(function () {
-			// ---------- 辅助函数：范围展开、模式解析 (同之前提供) ----------
-			function expandRange(start, end) {
-				const startCode = start.charCodeAt(0);
-				const endCode = end.charCodeAt(0);
-				const result = [];
-				for (let code = startCode; code <= endCode; code++) {
-					result.push(String.fromCharCode(code));
-				}
-				return result;
-			}
+        .stat-badge .count {
+            color: var(--primary);
+            font-size: 12px;
+        }
 
-			function tokenizePattern(pattern) {
-				const tokens = [];
-				const rangeRegex = /\[([A-Za-z0-9])-([A-Za-z0-9])\]/g;
-				let lastIndex = 0;
-				let match;
-				while ((match = rangeRegex.exec(pattern)) !== null) {
-					if (match.index > lastIndex) {
-						tokens.push(pattern.substring(lastIndex, match.index));
-					}
-					tokens.push({ type: 'range', start: match[1], end: match[2] });
-					lastIndex = match.index + match[0].length;
-				}
-				if (lastIndex < pattern.length) {
-					tokens.push(pattern.substring(lastIndex));
-				}
-				return tokens.filter((t) => !(typeof t === 'string' && t === ''));
-			}
+        .stat-badge.placed {
+            background: var(--success-light);
+            color: var(--success-text);
+        }
 
-			function expandPattern(pattern) {
-				const tokens = tokenizePattern(pattern);
-				if (tokens.length === 0) return [''];
-				let results = [''];
-				for (const token of tokens) {
-					if (typeof token === 'string') {
-						results = results.map((r) => r + token);
-					} else {
-						const chars = expandRange(token.start, token.end);
-						results = results.flatMap((r) => chars.map((c) => r + c));
-					}
-				}
-				return results;
-			}
+        .stat-badge.placed .count {
+            color: var(--success);
+        }
 
-			function parseIncrementalInput(inputStr) {
-				if (!inputStr.trim()) return [''];
-				const parts = inputStr.split(',').map((p) => p.trim());
-				return parts.flatMap((part) => expandPattern(part));
-			}
+        /* 主列表区 */
+        .content-section {
+            flex: 1;
+            min-height: 0;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding: 8px 12px 4px 12px;
+        }
 
-			// ---------- 生成器工厂 (基于当前DOM行) ----------
-			function createSequenceGenerator() {
-				const rows = document.querySelectorAll('.row');
-				const rowsData = [];
+        .content-section::-webkit-scrollbar {
+            width: 4px;
+        }
+        .content-section::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .content-section::-webkit-scrollbar-thumb {
+            background: #d1d6de;
+            border-radius: 8px;
+        }
 
-				for (const row of rows) {
-					const select = row.querySelector('select');
-					const input = row.querySelector('input');
-					const selectValue = select ? select.value : 'FIXED';
-					const inputValue = input ? input.value : '';
+        /* 器件卡片 */
+        .part-card {
+            background: #fcfdfd;
+            border: 1.5px solid #e8ebf0;
+            border-radius: var(--radius-sm);
+            margin-bottom: 8px;
+            overflow: hidden;
+            transition: border-color 0.2s;
+        }
 
-					if (selectValue === 'FIXED') {
-						rowsData.push({ values: [inputValue] });
-					} else if (selectValue === 'INCREMENTAL') {
-						const values = parseIncrementalInput(inputValue);
-						rowsData.push({ values: values.length ? values : [''] });
-					} else {
-						// 默认固定
-						rowsData.push({ values: [inputValue] });
-					}
-				}
+        .part-card.expanded {
+            border-color: #c5d5f8;
+        }
 
-				console.log(rowsData);
-				const totalRows = rowsData.length;
-				const currentIndices = new Array(totalRows).fill(0);
-				let ended = false;
+        .part-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 10px;
+            cursor: pointer;
+            background: #f9fafb;
+            transition: background 0.1s;
+            border-bottom: 1px solid transparent;
+        }
 
-				function next() {
-					if (ended) return null;
-					// 拼接当前组合
-					let result = '';
-					for (let i = 0; i < totalRows; i++) {
-						result += rowsData[i].values[currentIndices[i]];
-					}
-					// 递增索引
-					let carry = true;
-					for (let i = totalRows - 1; i >= 0 && carry; i--) {
-						if (currentIndices[i] + 1 < rowsData[i].values.length) {
-							currentIndices[i]++;
-							carry = false;
-						} else {
-							currentIndices[i] = 0;
-						}
-					}
-					if (carry) ended = true;
-					return result;
-				}
+        .part-header:hover {
+            background: #f0f3f8;
+        }
 
-				function reset() {
-					currentIndices.fill(0);
-					ended = false;
-				}
+        .part-card.expanded .part-header {
+            border-bottom-color: #e8ebf0;
+            background: #f4f6fa;
+        }
 
-				return { next, reset };
-			}
+        .part-name {
+            font-weight: 600;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
 
-			// ---------- DOM 元素 ----------
-			const container = document.getElementById('rowsContainer');
-			const generatorView = document.getElementById('generatorView');
-			const generatorInput = document.getElementById('generatorInput');
-			const mainBar = document.getElementById('mainBar');
-			const generatorBar = document.getElementById('generatorBar');
-			const startBtn = document.getElementById('start');
-			const cancelBtn = document.getElementById('cancel');
-			const nextBtn = document.getElementById('nextBtn');
-			const backBtn = document.getElementById('backBtn');
-			const autoIncCheck = document.getElementById('autoIncrement');
+        .collapse-icon {
+            font-size: 10px;
+            color: #9aa3b0;
+            transition: transform 0.2s;
+            display: inline-block;
+            width: 14px;
+            text-align: center;
+        }
 
-			// 当前生成器实例
-			let currentGenerator = null;
+        .part-card.expanded .collapse-icon {
+            transform: rotate(90deg);
+        }
 
-			// ---------- 创建一行 (修改选项为固定/递增) ----------
-			function createRow() {
-				const rowDiv = document.createElement('div');
-				rowDiv.className = 'row';
+        .part-summary {
+            font-size: 11px;
+            color: var(--text-secondary);
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
 
-				// 选择框：固定(FIXED) / 递增(INCREMENTAL)
-				const select = document.createElement('select');
-				const optFixed = document.createElement('option');
-				optFixed.value = 'FIXED';
-				optFixed.textContent = '固定';
-				const optInc = document.createElement('option');
-				optInc.value = 'INCREMENTAL';
-				optInc.textContent = '递增';
-				select.appendChild(optFixed);
-				select.appendChild(optInc);
+        .part-summary .placed-count {
+            color: var(--success);
+            font-weight: 600;
+        }
 
-				const input = document.createElement('input');
-				input.type = 'text';
-				input.placeholder = '输入内容';
-				input.spellcheck = false;
+        /* 映射列表（展开后显示） */
+        .pin-list {
+            display: none;
+        }
 
-				const addBtn = document.createElement('button');
-				addBtn.type = 'button';
-				addBtn.className = 'add-btn';
-				addBtn.textContent = '+';
-				addBtn.setAttribute('aria-label', '添加一行');
+        .part-card.expanded .pin-list {
+            display: block;
+        }
 
-				const deleteBtn = document.createElement('button');
-				deleteBtn.type = 'button';
-				deleteBtn.className = 'delete-btn';
-				deleteBtn.textContent = '×';
-				deleteBtn.setAttribute('aria-label', '删除此行');
+        .pin-item {
+            display: flex;
+            align-items: center;
+            padding: 6px 10px 6px 24px;
+            font-size: 12px;
+            border-bottom: 1px solid #f5f6f8;
+            transition: background 0.1s;
+            gap: 8px;
+        }
 
-				rowDiv.appendChild(select);
-				rowDiv.appendChild(input);
-				rowDiv.appendChild(addBtn);
-				rowDiv.appendChild(deleteBtn);
+        .pin-item:last-child {
+            border-bottom: none;
+        }
 
-				return rowDiv;
-			}
+        .pin-item.placed {
+            background: #f2fdf5;
+            border-left: 4px solid var(--success);
+        }
 
-			// 确保至少有一行
-			function ensureRowExists() {
-				if (container.children.length === 0) {
-					container.appendChild(createRow());
-				}
-			}
-			ensureRowExists();
+        .pin-item:not(.placed) {
+            border-left: 4px solid transparent;
+        }
 
-			// 重置所有行为默认一行 (取消按钮功能)
-			function resetToDefaultRow() {
-				container.innerHTML = ''; // 清空
-				container.appendChild(createRow()); // 添加一行默认
-			}
+        .pin-pin {
+            font-weight: 500;
+            color: var(--text);
+            min-width: 60px;
+        }
 
-			// ---------- 事件委托：处理行内 + / × (同之前) ----------
-			container.addEventListener('click', function (e) {
-				const addBtn = e.target.closest('.add-btn');
-				if (addBtn) {
-					e.preventDefault();
-					const currentRow = addBtn.closest('.row');
-					if (!currentRow) return;
-					const newRow = createRow();
-					currentRow.insertAdjacentElement('afterend', newRow);
-					return;
-				}
+        .pin-arrow {
+            color: #b0b7c3;
+            font-size: 11px;
+            margin: 0 4px;
+        }
 
-				const deleteBtn = e.target.closest('.delete-btn');
-				if (deleteBtn) {
-					e.preventDefault();
-					const currentRow = deleteBtn.closest('.row');
-					if (!currentRow) return;
-					const allRows = document.querySelectorAll('.row');
-					if (allRows.length <= 1) {
-						alert('至少保留一行');
-						return;
-					}
-					currentRow.remove();
-				}
-			});
+        .pin-net {
+            flex: 1;
+            color: var(--text);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
 
-			// ---------- 主按钮事件 ----------
-			// 开始：切换到生成视图，初始化生成器并显示第一个值
-			startBtn.addEventListener('click', function () {
-				// 隐藏动态行区域和主按钮栏
-				container.classList.add('hidden');
-				mainBar.classList.add('hidden');
-				// 显示生成器视图及其按钮栏
-				generatorView.classList.remove('hidden');
-				generatorBar.classList.remove('hidden');
+        .pin-status {
+            font-size: 11px;
+            font-weight: 600;
+            margin-left: auto;
+            padding: 2px 8px;
+            border-radius: 10px;
+            background: #f0fdf4;
+            color: var(--success);
+            white-space: nowrap;
+        }
 
-				// 基于当前行创建生成器
-				currentGenerator = createSequenceGenerator();
-				// 获取第一个字符串并显示
-				const first = currentGenerator.next();
-				generatorInput.value = first !== null ? first : '';
-			});
+        .pin-item:not(.placed) .pin-status {
+            background: #fef2f2;
+            color: var(--danger);
+        }
 
-			// 取消：重置为默认一行 (并确保在主视图)
-			cancelBtn.addEventListener('click', function () {
-				// 如果当前在生成视图，先切回主视图 (但取消按钮在主视图可见，所以通常不涉及)
-				// 为了安全，强制显示主视图
-				container.classList.remove('hidden');
-				mainBar.classList.remove('hidden');
-				generatorView.classList.add('hidden');
-				generatorBar.classList.add('hidden');
-				// 重置为只有一行
-				resetToDefaultRow();
-				currentGenerator = null;
-			});
+        .no-data {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: #bcc3cd;
+            font-size: 12px;
+            font-style: italic;
+            padding: 20px;
+        }
 
-			// 返回：回到主视图
-			backBtn.addEventListener('click', function () {
-				container.classList.remove('hidden');
-				mainBar.classList.remove('hidden');
-				generatorView.classList.add('hidden');
-				generatorBar.classList.add('hidden');
-				currentGenerator = null;
-			});
+        /* 底部按钮栏 */
+        .bottom-bar {
+            flex-shrink: 0;
+            display: flex;
+            gap: 8px;
+            padding: 10px 14px 12px 14px;
+            border-top: 1px solid #eef0f3;
+            background: #fafbfc;
+            z-index: 5;
+        }
 
-			// 下一个：获取下一个组合字符串并显示 (如果结束则自动重置循环)
-			nextBtn.addEventListener('click', function () {
-				if (!currentGenerator) {
-					// 如果意外丢失，重新创建
-					currentGenerator = createSequenceGenerator();
-				}
-				let nextVal = currentGenerator.next();
-				if (nextVal === null) {
-					// 已穷尽，重置并从头开始
-					currentGenerator.reset();
-					nextVal = currentGenerator.next();
-				}
-				generatorInput.value = nextVal !== null ? nextVal : '';
+        .btn {
+            flex: 1;
+            height: 36px;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            font-family: inherit;
+            letter-spacing: 0.01em;
+            white-space: nowrap;
+            outline: none;
+            position: relative;
+            overflow: hidden;
+        }
 
-				// 自动递增复选框逻辑：如果选中，则自动再次点击下一个（模拟连续递增）
-				// 这里实现简单的自动连点：但为避免无限循环，仅在复选框选中时触发一次？通常需要间隔，但需求未明确，故只做界面展示
-				// 我们可以简单提示，或者留作扩展。为了体验，如果选中，则短暂延迟后再触发一次？但可能造成递归。暂不实现自动连点。
-				// 仅保留复选框界面。
-			});
+        .btn:active {
+            transform: scale(0.97);
+        }
 
-			// 可选：防止因MutationObserver导致意外
-			const observer = new MutationObserver(() => {
-				if (container.children.length === 0) {
-					container.appendChild(createRow());
-				}
-			});
-			observer.observe(container, { childList: true, subtree: false });
-		})();
-	</script>
+        .btn-extract {
+            background: #3b6df0;
+            color: #fff;
+            box-shadow: 0 2px 6px rgba(59, 109, 240, 0.3);
+        }
+        .btn-extract:hover {
+            background: #2b5de0;
+        }
+        .btn-extract:disabled {
+            background: #c5d0e8;
+            cursor: not-allowed;
+            box-shadow: none;
+            color: #e8ecf5;
+        }
+
+        .btn-place {
+            background: #22c55e;
+            color: #fff;
+            box-shadow: 0 2px 6px rgba(34, 197, 94, 0.3);
+        }
+        .btn-place:hover {
+            background: #16a34a;
+        }
+        .btn-place:disabled {
+            background: #b2dfc0;
+            cursor: not-allowed;
+            box-shadow: none;
+            color: #e8f5e9;
+        }
+
+        .btn-clear {
+            background: #fff;
+            color: #ef4444;
+            border: 1.5px solid #fecaca;
+        }
+        .btn-clear:hover {
+            background: #fef2f2;
+        }
+        .btn-clear:disabled {
+            color: #d5c8c8;
+            border-color: #f0e0e0;
+            cursor: not-allowed;
+            background: #fafafa;
+        }
+
+        .toast {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.9);
+            background: rgba(30, 35, 45, 0.9);
+            color: #fff;
+            padding: 10px 18px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            pointer-events: none;
+            opacity: 0;
+            transition: all 0.25s ease;
+            z-index: 100;
+            white-space: nowrap;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+        }
+    </style>
+</head>
+<body>
+<div class="app-container">
+    <div class="toast" id="toast"></div>
+
+    <!-- 头部统计 -->
+    <div class="header">
+        <div class="header-left">
+            <span>📌</span> 引脚网络映射
+        </div>
+        <div class="stats">
+            <span class="stat-badge">映射 <span class="count" id="totalMappings">0</span></span>
+            <span class="stat-badge placed">已放置 <span class="count" id="totalPlaced">0</span></span>
+        </div>
+    </div>
+
+    <!-- 可折叠的器件列表 -->
+    <div class="content-section" id="partListContainer">
+        <div class="no-data" id="noDataMsg">暂无数据，请点击“提取”</div>
+    </div>
+
+    <!-- 底部按钮 -->
+    <div class="bottom-bar">
+        <button class="btn btn-extract" id="btnExtract">提取</button>
+        <button class="btn btn-place" id="btnPlace" disabled>放置</button>
+        <button class="btn btn-clear" id="btnClear" disabled>清除</button>
+    </div>
+</div>
+
+<script>
+    (function() {
+        // ==================== DOM ====================
+        const partListContainer = document.getElementById('partListContainer');
+        const noDataMsg = document.getElementById('noDataMsg');
+        const totalMappingsSpan = document.getElementById('totalMappings');
+        const totalPlacedSpan = document.getElementById('totalPlaced');
+        const btnExtract = document.getElementById('btnExtract');
+        const btnPlace = document.getElementById('btnPlace');
+        const btnClear = document.getElementById('btnClear');
+        const toast = document.getElementById('toast');
+
+        // ==================== 状态 ====================
+        // 数据结构：一个数组，每项为 { partRef: string, pin: string, net: string, placed: boolean }
+        let mappings = [];
+
+        // 示意数据（用于测试页面显示）
+        const sampleData = [
+            { partRef: 'U1', pin: '1', net: 'VCC', placed: false },
+            { partRef: 'U1', pin: '2', net: 'GND', placed: true },
+            { partRef: 'U1', pin: '3', net: 'SIG_A', placed: false },
+            { partRef: 'U2', pin: '4', net: 'SIG_B', placed: false },
+            { partRef: 'U2', pin: '5', net: 'SIG_C', placed: true },
+            { partRef: 'U3', pin: '6', net: 'CLK', placed: true },
+            { partRef: 'U3', pin: '7', net: 'DATA', placed: false },
+            { partRef: 'U3', pin: '8', net: 'EN', placed: false },
+        ];
+
+        // ==================== Toast ====================
+        let toastTimer;
+        function showToast(msg) {
+            if (toastTimer) clearTimeout(toastTimer);
+            toast.textContent = msg;
+            toast.classList.add('show');
+            toastTimer = setTimeout(() => {
+                toast.classList.remove('show');
+                toastTimer = null;
+            }, 1500);
+        }
+
+        // ==================== 辅助计算 ====================
+        function getPlacedCount() {
+            return mappings.filter(m => m.placed).length;
+        }
+
+        function getPartGroups() {
+            const groups = {};
+            mappings.forEach(m => {
+                if (!groups[m.partRef]) groups[m.partRef] = [];
+                groups[m.partRef].push(m);
+            });
+            return groups;
+        }
+
+        // ==================== UI渲染 ====================
+        function renderStats() {
+            totalMappingsSpan.textContent = mappings.length;
+            totalPlacedSpan.textContent = getPlacedCount();
+        }
+
+        function renderList() {
+            partListContainer.innerHTML = '';
+
+            if (mappings.length === 0) {
+                const noData = document.createElement('div');
+                noData.className = 'no-data';
+                noData.textContent = '暂无数据，请点击“提取”';
+                partListContainer.appendChild(noData);
+                updateButtonStates();
+                renderStats();
+                return;
+            }
+
+            const groups = getPartGroups();
+            const partRefs = Object.keys(groups).sort();
+
+            partRefs.forEach(ref => {
+                const card = document.createElement('div');
+                card.className = 'part-card';
+                // 默认折叠
+                const header = document.createElement('div');
+                header.className = 'part-header';
+
+                const pinMappings = groups[ref];
+                const placedCount = pinMappings.filter(m => m.placed).length;
+                const totalCount = pinMappings.length;
+
+                header.innerHTML = `
+                    <div class="part-name">
+                        <span class="collapse-icon">▶</span> ${ref}
+                    </div>
+                    <div class="part-summary">
+                        <span>${totalCount} 引脚</span>
+                        <span class="placed-count">${placedCount} 已放置</span>
+                    </div>
+                `;
+
+                const pinList = document.createElement('div');
+                pinList.className = 'pin-list';
+
+                pinMappings.forEach(m => {
+                    const item = document.createElement('div');
+                    item.className = 'pin-item';
+                    if (m.placed) item.classList.add('placed');
+                    item.innerHTML = `
+                        <span class="pin-pin">${m.pin}</span>
+                        <span class="pin-arrow">→</span>
+                        <span class="pin-net">${m.net}</span>
+                        <span class="pin-status">${m.placed ? '已放置' : '未放置'}</span>
+                    `;
+                    pinList.appendChild(item);
+                });
+
+                // 点击器件头切换展开/折叠
+                header.addEventListener('click', () => {
+                    card.classList.toggle('expanded');
+                });
+
+                card.appendChild(header);
+                card.appendChild(pinList);
+                partListContainer.appendChild(card);
+            });
+
+            updateButtonStates();
+            renderStats();
+        }
+
+        function updateButtonStates() {
+            const hasMappings = mappings.length > 0;
+            const hasUnplaced = mappings.some(m => !m.placed);
+            btnPlace.disabled = !hasUnplaced;
+            btnClear.disabled = !hasMappings;
+            // 提取按钮始终保持可用
+            btnExtract.disabled = false;
+        }
+
+        // ==================== 核心功能（留白） ====================
+        async function extractMappings() {
+            // TODO: 从PCB提取引脚网络映射，并替换 mappings 数组
+            // 此处使用示意数据模拟提取
+            mappings = sampleData.map(m => ({ ...m })); // 复制一份
+            showToast(`已提取 ${mappings.length} 条映射`);
+        }
+
+        async function placeNets() {
+            // TODO: 在原理图中放置网络端口，并更新对应映射的 placed 状态
+            // 模拟：将所有未放置的标记为已放置
+            let placedCount = 0;
+            mappings.forEach(m => {
+                if (!m.placed) {
+                    m.placed = true;
+                    placedCount++;
+                }
+            });
+            if (placedCount > 0) {
+                showToast(`已放置 ${placedCount} 个网络`);
+            } else {
+                showToast('所有网络均已放置');
+            }
+        }
+
+        function clearAll() {
+            mappings = [];
+            showToast('已清除所有映射');
+        }
+
+        // ==================== 按钮事件 ====================
+        btnExtract.addEventListener('click', async () => {
+            btnExtract.disabled = true;
+            try {
+                await extractMappings();
+            } catch (e) {
+                console.error(e);
+                showToast('提取失败');
+            } finally {
+                btnExtract.disabled = false;
+                renderList();
+            }
+        });
+
+        btnPlace.addEventListener('click', async () => {
+            btnPlace.disabled = true;
+            try {
+                await placeNets();
+            } catch (e) {
+                console.error(e);
+                showToast('放置失败');
+            } finally {
+                btnPlace.disabled = false;
+                renderList();
+            }
+        });
+
+        btnClear.addEventListener('click', () => {
+            clearAll();
+            renderList();
+        });
+
+        // ==================== 初始化 ====================
+        function init() {
+            mappings = [];
+            renderList();
+            console.log('✅ 引脚网络映射工具已就绪（示意数据将自动加载）');
+        }
+
+        init();
+    })();
+</script>
+</body>
 </html>

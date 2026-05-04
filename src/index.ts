@@ -52,7 +52,7 @@ export function getOrSetNet(): void {
 }
 
 export function setNetToPin(): void {
-	eda.sys_IFrame.openIFrame('./iframe/setNetToPin.html', 340, 200, 'setNetToPinWindow', {
+	eda.sys_IFrame.openIFrame('./iframe/setNetToPin.html', 340, 400, 'setNetToPinWindow', {
 		buttonCallbackFn: (e: string) => {
 			if (e === 'close') {
 				// eda.sys_Message.removeFollowMouseTip();
