@@ -254,11 +254,18 @@ async function addHelper() {
 	if (selected.length === 0) {
 		return;
 	}
+	const netList = new Set();
 	for (const item of selected) {
 		const net = item?.net;
 		if (net)
-			addNetworkName(net);
-		else showToast('请选择存在网络的导线、焊盘、铺铜等获取网络');
+			netList.add(net);
+	}
+	if (netList.size === 0) {
+		showToast('请选择存在网络的导线、焊盘、铺铜等获取网络');
+		return;
+	}
+	for (const net of netList) {
+		addNetworkName(net);
 	}
 }
 const debAddHelper = debounceAsync(addHelper);
@@ -398,7 +405,9 @@ btnApply.addEventListener('click', async () => {
 	pendingRemoved.clear();
 	showToast('更改已应用', 'success');
 	// 重新获取数据
-	getData();
+	if (!(await getData())) {
+		showToast('获取网络类/等长网络组数据失败, 请重启插件', 'error');
+	}
 	applyFilterAndRender();
 });
 
@@ -490,6 +499,7 @@ async function getData() {
 		currentCategoryName = data ? currentCategoryName : null;
 		comboboxInput.value = currentCategoryName;
 	}
+	activeNetworkNames = currentNetworkNames;
 	if (lastSelectedGroup.netClass && !dataMap.netClass[lastSelectedGroup.netClass]) {
 		lastSelectedGroup.netClass = null;
 	}
