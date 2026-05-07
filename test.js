@@ -872,11 +872,13 @@
 // 	},
 // ];
 
-// // 按规则更改网络端口为默认端口符号
-// const NameList = ['osys-in'];
-// const ReplaceMap = {
+// 按规则更改网络端口为默认端口符号
+// const _ReplaceMap = {
 // 	'osys-in': 'IN',
 // };
+// NameList.forEach((e)=>{e.toLocaleLowerCase()});
+// const ReplaceMap = Object.fromEntries(Object.entries(_ReplaceMap).map(([key, value]) => [key.toLowerCase(), value]));
+// const NameList = Object.keys(ReplaceMap);
 // const allNetport = await eda.sch_PrimitiveComponent.getAll('netport');
 // console.log('allNetport', allNetport);
 // let addCount = 0;
@@ -1072,3 +1074,95 @@
 //     }
 // ]
 
+eda.sys_Message.showToastMessage('请选择需要提取的元件', 'info', 5);
+eda.sch_Event.addMouseEventListener(
+	'getPartPinNet',
+	'selected',
+	() => {
+		try {
+			await getPartPinNet();
+		} catch (e) {
+			console.error(e);
+			eda.sys_Log.add(String(e), 'error');
+			eda.sys_Message.showToastMessage('脚本运行错误, 错误详情请查看日志', 'error', 5);
+		}
+	},
+	true,
+);
+
+async function getPartPinNet() {
+	const itemsId = await eda.sch_SelectControl.getAllSelectedPrimitives_PrimitiveId();
+	console.log('getPartPinNet itemsId', itemsId);
+	if (!itemsId.length || itemsId.length > 1) {
+		eda.sys_Message.showToastMessage('请选择一个元件', 'info', 5);
+		return;
+	}
+	const id = itemsId[0];
+	const type = await eda.sch_Primitive.getPrimitiveTypeByPrimitiveId(id);
+	if (type !== 'Component') {
+		eda.sys_Message.showToastMessage('请选择元件');
+		return;
+	}
+	const comp = await eda.sch_PrimitiveComponent.get(id);
+	if (!comp) {
+		eda.sys_Message.showToastMessage(`获取获取元件信息失败, 元件图元ID:${id}`, 'warn', 5);
+		return;
+	}
+	if (comp.getState_ComponentType() !== 'part') {
+		eda.sys_Message.showToastMessage('请选择元件','info',5);
+		return;
+	}
+	const designator = comp.getState_Designator();
+	console.log('getPartPinNet designator', designator);
+	if (!designator) {
+		eda.sys_Message.showToastMessage(`获取元件位号失败`, 'warn', 5);
+		return;
+	}
+
+	const netlistBlob = await eda.sch_ManufactureData.getNetlistFile('', 'JLCEDA');
+	const netlistComps = JSON.parse(await netlistBlob.text()).components;
+	console.log('getPartPinNet netlistComps', netlistComps);
+
+	for (const item of Object.values(netlistComps)) {
+		if (item?.props?.Designator === designator) {
+			const file = objToCsvFile(item.pinInfoMap,`${designator}引脚-网络.csv`);
+			console.log('getPartPinNet file',file);
+			await eda.sys_FileSystem.saveFile(file);
+			return;
+		}
+	}
+	eda.sys_Message.showToastMessage('未在网表中找到该元件','info',5);
+	
+}
+/**
+ * 将对象（每个属性值为包含 name, number, net 的对象）转换为 CSV 文件的 File 对象
+ * @param {Object} obj - 源对象，例如 { A1: { name: "GND", number: "A1", net: "GND" } }
+ * @param {string} filename - 下载时的文件名，默认 'data.csv'
+ * @returns {File} CSV 文件对象
+ */
+function objToCsvFile(obj, filename = 'data.csv') {
+	const headers = ['name', 'number', 'net'];
+
+	const escapeField = (field) => {
+		if (field === undefined || field === null) return '';
+		let str = String(field);
+		if (str.includes(',') || str.includes('"') || str.includes('\n') || str.includes('\r')) {
+			str = str.replace(/"/g, '""');
+			str = `"${str}"`;
+		}
+		return str;
+	};
+
+	const rows = [headers.map(escapeField).join(',')];
+
+	for (const key in obj) {
+		const item = obj[key];
+		if (item && typeof item === 'object') {
+			const row = headers.map((h) => escapeField(item[h]));
+			rows.push(row.join(','));
+		}
+	}
+
+	const csvString = rows.join('\n');
+	return new File([csvString], filename, { type: 'text/csv' });
+}
