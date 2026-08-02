@@ -145,6 +145,7 @@ function applyFilterAndRender() {
 	renderList();
 	updateCountHint();
 	updateButtonStates();
+	syncSelectedNetworks();
 }
 
 // 渲染列表
@@ -215,6 +216,32 @@ function updateButtonStates() {
 	btnStop.disabled = !isAddingMode;
 }
 
+// 在PCB图中同步选中网络
+async function syncSelectedNetworks() {
+	if (!(await eda.pcb_SelectControl.clearSelected())) {
+		showToast(`清除选中失败`, 'warn');
+	}
+	const itemsID = [];
+	for (const idx of selectedIndices) {
+		const items = await eda.pcb_Net.getAllPrimitivesByNet(activeNetworkNames[idx]);
+		for (const item of items) {
+			itemsID.push(item.globalIndex);
+		}
+	}
+	console.log('netClassHelper syncSelectedNetworks', itemsID);
+	if (itemsID.length === 0) {
+		return;
+	}
+
+	if (!(await eda.pcb_SelectControl.doSelectPrimitives(itemsID))) {
+		showToast(`选中网络失败`, 'warn');
+	}
+
+	if (!(await eda.dmt_EditorControl.zoomToSelectedPrimitives())) {
+		showToast(`适应选中失败`, 'warn');
+	}
+}
+
 // 多选处理（Ctrl/Shift）
 function handleItemClick(idx, event) {
 	const ctrlKey = event.ctrlKey || event.metaKey;
@@ -267,6 +294,9 @@ async function addHelper() {
 	for (const net of netList) {
 		addNetworkName(net);
 	}
+	selectedIndices.clear();
+	lastClickIndex = -1;
+	applyFilterAndRender();
 }
 const debAddHelper = debounceAsync(addHelper);
 
@@ -451,9 +481,7 @@ function addNetworkName(name) {
 
 	currentNetworkNames.push(name);
 	pendingAdded.add(name);
-	selectedIndices.clear();
-	lastClickIndex = -1;
-	applyFilterAndRender();
+
 	showToast(`已临时添加: ${name}`, undefined, 3);
 }
 
@@ -470,7 +498,9 @@ function debounceAsync(fn, duration = 100) {
 				fn.call(this, ...args)
 					.then(resolve)
 					.catch(reject)
-					.finally(() => { rejectPrevious = null; });
+					.finally(() => {
+						rejectPrevious = null;
+					});
 			}, duration);
 		});
 	};
